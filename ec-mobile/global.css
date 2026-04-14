@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  /* Light mode — softened Neon Luminary palette */
+  --color-primary: 49, 107, 243;     /* #316bf3 primary-dim */
+  --color-background: 235 240 255;   /* light wash */
+  --color-surface: 255 255 255;
+  --color-text: 6 14 32;             /* #060e20 inverted */
+  --color-text-secondary: 64 72 93;  /* #40485d outline-variant */
+  --color-border: 200 210 230;
+}
+
+.dark * {
+  /* Dark mode — Neon Luminary (DESIGN.md) */
+  --color-primary: 144, 171, 255;    /* #90abff */
+  --color-background: 6 14 32;       /* #060e20 surface base */
+  --color-surface: 15 25 48;         /* #0f1930 surface-container */
+  --color-text: 232 238 255;         /* #e8eeff */
+  --color-text-secondary: 200 208 224; /* #c8d0e0 */
+  --color-border: 64 72 93;          /* #40485d outline-variant */
+}

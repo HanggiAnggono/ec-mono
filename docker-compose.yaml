@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ecom-postgres
+    environment:
+      POSTGRES_USER: ecom_user
+      POSTGRES_PASSWORD: ecom_password
+      POSTGRES_DB: ecom_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d ecom_db -U ecom_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecom-network
+
+  ec-be-core:
+    build:
+      context: ./ec-be-core
+      dockerfile: Dockerfile
+      args:
+        HOST_NODE_EXTRA_CA_CERTS: ${NODE_EXTRA_CA_CERTS:-}
+    container_name: ecom-core
+    environment:
+      DB_CONNECTION: postgresql://ecom_user:ecom_password@postgres:5432/ecom_db
+      PAYMENT_SVC_HOST: http://ec-payment:8000
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./ec-be-core:/app
+      - /app/node_modules
+    networks:
+      - ecom-network
+    command: npm run start:dev
+
+  ec-payment:
+    build:
+      context: ./ec-payment
+      dockerfile: Dockerfile
+    container_name: ecom-payment
+    environment:
+      PYTHONUNBUFFERED: 1
+      MIDTRANS_SERVER_KEY: ${MIDTRANS_SERVER_KEY:-SB-Mid-server-y8flPbsms4Mf1cmAiyBWeLUX}
+      DATABASE_URL: postgresql://ecom_user:ecom_password@postgres:5432/ecom_db
+      PYTHONPATH: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      ec-be-core:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./ec-payment:/app
+    networks:
+      - ecom-network
+    command: uvicorn ec_payment.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app
+
+volumes:
+  postgres_data:
+
+networks:
+  ecom-network:
+    driver: bridge

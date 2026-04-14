@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "ec-mobile",
+    "slug": "ec-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/EC.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/EC.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hanggi.ecmobile",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "userInterfaceStyle": "automatic"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/EC.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.hanggi.ecmobile",
+      "userInterfaceStyle": "automatic"
+    },
+    "web": {
+      "favicon": "./assets/EC.png",
+      "bundler": "metro"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "f2e636e7-633d-48ac-a2ff-78c92cc668d3"
+      }
+    },
+    "sdkVersion": "53.0.0"
+  },
+  "name": "ec-mobile"
+}

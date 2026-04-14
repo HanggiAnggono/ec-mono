@@ -1,0 +1,40 @@
+### create payment
+POST http://localhost:8000/create-payment
+
+{
+  "order_id": "{{$guid}}",
+  "amount": 10,
+  "customer": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": "0878248219493",
+    "email": "john@doe.com"
+  },
+  "description": "lorem ipsum dolor sit consecti"
+}
+
+
+# FIXME: this is still returning 404 transaction id not found
+### get order
+@order_id = 6f1cf3b3-7f07-4e4a-945a-754f399595d7
+GET http://localhost:8000/transaction/{{order_id}}
+
+### Webhook
+POST http://localhost:8000/handle-webhook
+Content-Type: application/json
+
+{
+  "transaction_time": "2023-11-15 18:45:13",
+  "transaction_status": "settlement",
+  "transaction_id": "513f1f01-c9da-474c-9fc9-d5c64364b709",
+  "status_message": "midtrans payment notification",
+  "status_code": "200",
+  "signature_key": "5b8a2490fc050ca39474c58441dd2a61c8caa75ec1ed04db7018bcd1f4b09cb206a9b24df8ad2b8f9b02f77b7b50e6be3abb29828418ab2d40c7bfd102c42e88",
+  "settlement_time": "2023-11-15 22:45:13",
+  "payment_type": "gopay",
+  "order_id": "payment_notif_test_G950120709_973b0071-951d-4218-81a8-e101e4cde372",
+  "merchant_id": "G950120709",
+  "gross_amount": "105000.00",
+  "fraud_status": "accept",
+  "currency": "IDR"
+}

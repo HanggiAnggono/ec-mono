@@ -1,0 +1,103 @@
+
+Designing a database for an e-commerce application can be a fun challenge.
+
+Since your application is a monolithic application, we can keep the database design relatively simple. Here's a proposed database design for your convenience store e-commerce application:
+
+Tables:
+
+- Users  
+	- `id` (primary key, auto-incrementing integer)  
+	- `username` (string, unique)  
+	- `password` (string, hashed)  
+	- `email` (string, unique)  
+	- `role` (string, e.g. "customer", "admin")
+
+- Products  
+	- `id` (primary key, auto-incrementing integer)  
+	- `name` (string)  
+	- `description` (string)  
+	- `category_id` (foreign key referencing the Categories table)
+
+- Categories  
+	- `id` (primary key, auto-incrementing integer)  
+	- `name` (string)
+
+- Product Variants  
+	- `id` (primary key, auto-incrementing integer)  
+	- `product_id` (foreign key referencing the Products table)  
+	- `variant_name` (string, e.g. "Size", "Color")  
+	- `variant_value` (string, e.g. "Large", "Red")  
+	- `price` (decimal)  
+	- `stock_quantity` (integer)
+
+- Orders  
+	- `id` (primary key, auto-incrementing integer)  
+	- `user_id` (foreign key referencing the Users table)  
+	- `order_date` (datetime)  
+	- `total` (decimal)  
+	- Authentication
+
+- Cart  
+	- handle add to cart  
+	- handle edit cart  
+	- check stock for product variants
+
+- Order Items  
+	- `id` (primary key, auto-incrementing integer)  
+	- `order_id` (foreign key referencing the Orders table)  
+	- `product_variant_id` (foreign key referencing the Product Variants table)  
+	- `quantity` (integer)
+
+- Payments
+  - `id` (primary key, auto-incrementing integer)
+  - `order_id` (foreign key referencing Orders table)
+  - `payment_method` (string: "xendit", "stripe", "paypal", etc.)
+  - `payment_provider` (string: specific provider name)
+  - `payment_status` (enum: "pending", "processing", "completed", "failed", "expired", "cancelled")
+  - `amount` (decimal)
+  - `currency` (string, default: "IDR")
+  - `external_payment_id` (string: provider's payment ID)
+  - `payment_url` (string: redirect URL for payment)
+  - `expires_at` (datetime: payment expiration, max 24 hours)
+  - `paid_at` (datetime: when payment was completed)
+  - `created_at` (datetime)
+  - `updated_at` (datetime)
+  - `metadata` (json: provider-specific data)
+TODO:
+	- create payment ✅
+	- get transaaction status ✅
+	- setup database with SQLAlchemy ✅
+	- payment table ✅
+	- payment webhook ✅
+	- map midtrans payment status and type ✅ i guess?
+	- route groups, skip
+	- order statuses
+		- pending, pending payment, payment received, orderconfirmed, failed, expired, awaiting shipment,onhold, awaiting pickup, completed, cancelled
+	- delete payment entity on be-core
+	- replace with payment service on be-core
+
+- setup pydantic
+alias generator to transform camel to snake and vice versa
+
+Config
+	- put all config in a config module
+	- use env variables
+
+Relationships:
+
+
+- A user can have many orders (one-to-many).
+- An order belongs to one user (many-to-one).
+- A product belongs to one category (many-to-one).
+- A category can have many products (one-to-many).
+- A product can have many variants (one-to-many).
+- A product variant belongs to one product (many-to-one).
+- An order can have many order items (one-to-many).
+- An order item belongs to one order (many-to-one).
+- An order item references a product variant (many-to-one).
+- A payment belongs to one order (many-to-one).
+
+This design supports products with categories and variants, allowing for flexible product options (such as size or color) and accurate inventory tracking.
+
+Let me know if you have any questions or if you'd like me to elaborate on any part of the design!
+

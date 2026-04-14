@@ -1,0 +1,67 @@
+### Product Create
+POST http://localhost:3000/products HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Chocolate",
+  "description": "A chocolate bar",
+  "categoryId": 1
+}
+
+### Product Get
+GET http://localhost:3000/products HTTP/1.1
+Content-Type: application/json
+
+
+### Product Get
+GET http://localhost:3000/products/7 HTTP/1.1
+
+
+### Category Get
+GET http://localhost:3000/product-category HTTP/1.1
+Content-Type: application/json
+
+### Category Create
+POST http://localhost:3000/product-category HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Food",
+  "description": "A category for food products"
+}
+
+
+### Users Get
+GET http://localhost:3000/user HTTP/1.1
+
+### Cart Get
+GET http://localhost:3000/cart?sessionId=de83883a-e997-4dba-bbcd-f461092c426d
+
+
+### Signup
+POST http://localhost:3000/auth/signup HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "hanggi.anggono+0@yahoo.com",
+  "username": "hanggi.anggono+1@yahoo.com",
+  "password": "hanggi123",
+  "firstname": "Hanggi 0",
+  "lastname": "Anggono"
+}
+
+
+### Login
+POST http://localhost:3000/auth/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "username": "hanggi.anggono+0@yahoo.com",
+  "password": "hanggi123"
+}
+
+
+### USers
+GET http://localhost:3000/user/4
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQsInVzZXJuYW1lIjoiaGFuZ2dpLmFuZ2dvbm8rMEB5YWhvby5jb20iLCJpYXQiOjE3NTg4NDk2NjMsImV4cCI6MTc1ODg1MDU2M30.b4OsknOqkEMpT6ohpBalhWHC4IKGLJV83ZACrwOCHf8

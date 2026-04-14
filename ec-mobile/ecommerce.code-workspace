@@ -1,0 +1,61 @@
+{
+  "folders": [
+    {
+      "path": "../ec-be-core",
+    },
+    {
+      "path": "../ec-fe-admin",
+    },
+    {
+      "path": ".",
+    },
+    {
+      "path": "../ec-payment",
+    }
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+  },
+  "launch": {
+    "version": "0.2.0",
+    "inputs": [
+      {
+        "id": "platform",
+        "description": "Choose platform",
+        "type": "pickString",
+        "default": "ios",
+        "options": ["ios", "android"],
+      },
+    ],
+    "configurations": [
+      {
+        "command": "pnpm expo start --go --${input:platform}",
+        "name": "Expo Go",
+        "request": "launch",
+        "type": "node-terminal",
+        "cwd": "${workspaceFolder}/../ec-mobile",
+        "postDebugTask": "xcrun simctl shutdown all",
+      },
+      {
+        "type": "node-terminal",
+        "name": "CORE: start:dev",
+        "request": "launch",
+        "command": "pnpm run start:dev",
+        "cwd": "${workspaceFolder}/../ec-be-core",
+      },
+    ],
+    "compounds": [
+      {
+        "name": "EC Start Dev",
+        "configurations": ["CORE: start:dev", "Expo Go"],
+        "stopAll": true,
+        "presentation": {
+          "hidden": false,
+          "group": "ECGROUP",
+          "order": 1,
+        },
+      },
+    ],
+  },
+}
