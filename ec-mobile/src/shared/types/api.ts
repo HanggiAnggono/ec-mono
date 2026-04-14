@@ -664,6 +664,10 @@ export interface components {
         CompleteCheckoutDto: {
             paymentMethod: string;
         };
+        CompleteCheckoutResponseDto: {
+            orderId: string;
+            transactionToken?: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -711,6 +715,7 @@ export type UpdateCartItemDto = components['schemas']['UpdateCartItemDto'];
 export type DeleteCartDto = components['schemas']['DeleteCartDto'];
 export type CheckoutCartDto = components['schemas']['CheckoutCartDto'];
 export type CompleteCheckoutDto = components['schemas']['CompleteCheckoutDto'];
+export type CompleteCheckoutResponseDto = components['schemas']['CompleteCheckoutResponseDto'];
 export type $defs = Record<string, never>;
 export interface operations {
     AppController_getHello: {
@@ -1606,7 +1611,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Order"];
+                    "application/json": components["schemas"]["CompleteCheckoutResponseDto"];
                 };
             };
         };
