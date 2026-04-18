@@ -29,7 +29,7 @@ export const Button = ({
   className,
   icon,
   disabled,
-  variant: _variant = 'default',
+  variant: _variant = 'primary',
   ...props
 }: Props) => {
   const variant = buttonVariants[_variant]
@@ -48,7 +48,8 @@ export const Button = ({
               {
                 [variant.pressed.btn]: pressed,
               },
-              variant.btn
+              variant.btn,
+              className
             )}
           >
             {icon && (

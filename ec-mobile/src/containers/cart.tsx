@@ -2,12 +2,13 @@ import Icon from '@/components/icon'
 import { useGetCart } from '@/module/cart/usecases/use-get-cart'
 import { useThemes } from '@/shared/hooks/use-themes'
 import { Link, useFocusEffect } from '@react-navigation/native'
+import { useColorScheme } from "nativewind"
 import { useCallback } from 'react'
 import { Text, View } from 'react-native'
 
 export const CartContainer = () => {
   const { refetch, data: cart } = useGetCart()
-  const { text } = useThemes()
+  const text = useColorScheme().colorScheme === 'dark' ? '#fff' : '#000'
 
   // Sync cart session id
   useFocusEffect(

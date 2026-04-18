@@ -25,13 +25,16 @@ import { PaymentScreen } from '@/screens/payment-screen'
 import { OrdersScreen } from '@/screens/orders-screen'
 import { MainTabBar } from '@/components/main-tab-bar'
 import { useThemes } from '@/shared/hooks/use-themes'
+import {useColorScheme} from 'nativewind'
 
 const Stack = createStackNavigator<RootStackParamList>()
 const HomeTab = createBottomTabNavigator()
 
 function HomeNavigator() {
   const { token } = useAuthStore()
-  const { primary, text } = useThemes()
+  const { primary } = useThemes()
+  const {colorScheme} = useColorScheme()
+  const text = colorScheme === 'dark' ? '#fff' : '#000'
 
   return (
     <HomeTab.Navigator
@@ -44,7 +47,7 @@ function HomeNavigator() {
           elevation: 0,
           shadowOpacity: 0,
         },
-        headerTintColor: text.toString(),
+        headerTintColor: text,
       }}
     >
       <HomeTab.Screen
@@ -162,7 +165,7 @@ export default function App() {
             headerStyle: {
               backgroundColor: primary,
             },
-            headerTintColor: text.toString(),
+            headerTintColor: '#fff',
           }}
         >
           {!token ? (
@@ -197,7 +200,10 @@ export default function App() {
                 name={Routes.HomeTab}
                 component={HomeNavigator}
                 navigationKey={token ? 'user' : 'guest'}
-                options={{ title: '', headerShown: false }}
+                options={{
+                  title: '',
+                  headerShown: false,
+                }}
               />
               <Stack.Screen
                 name={Routes.ProductDetail}

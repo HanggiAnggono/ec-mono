@@ -37,7 +37,10 @@ export class ProductsService {
 
   async findAll(pagination: PageParamDto): Promise<FindAllProductDto> {
     const query = this.productRepository.createQueryBuilder('product');
-    query.take(pagination.take).skip(pagination.skip);
+    query
+      .leftJoinAndSelect('product.category', 'category')
+      .take(pagination.take)
+      .skip(pagination.skip);
 
     const [items, total] = await query.getManyAndCount();
     const pageCount = Math.ceil(total / pagination.take!);
