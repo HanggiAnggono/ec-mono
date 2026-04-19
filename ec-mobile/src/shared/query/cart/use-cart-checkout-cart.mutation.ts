@@ -8,7 +8,7 @@ import { useInfiniteQuery } from "@tanstack/react-query"
 import type { FetchOptions } from "openapi-fetch"
 import { OpenapiQueryClient } from "openapi-react-query"
 
-export const useCartCheckoutCart = (options?: Parameters<OpenapiQueryClient<'post', '/cart/{sessionId}/checkout'>['useMutation']>['2']) => {
+export const useCartCheckoutCart = (options?: Parameters<OpenapiQueryClient<'post', '/cart/checkout'>['useMutation']>['2']) => {
       // @ts-ignore
-    return apiClient.useMutation('post', '/cart/{sessionId}/checkout' as const, options)
+    return apiClient.useMutation('post', '/cart/checkout' as const, options)
   }

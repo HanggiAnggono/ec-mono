@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -160,11 +161,16 @@ export class CartService {
   async updateCartItem(
     cartItemId: number,
     updateCartItemDto: UpdateCartItemDto,
+    userId: number,
   ): Promise<Cart> {
     const cartItem = await this.cartItemRepository.findOneOrFail({
       where: { id: cartItemId },
       relations: ['cart'],
     });
+
+    if (cartItem.cart.userId !== userId) {
+      throw new ForbiddenException('You do not have access to this cart item');
+    }
 
     // Check if product is in stock
     const productVariant = await this.productVariantRepository.findOneOrFail({
@@ -197,11 +203,15 @@ export class CartService {
     return this.getCart(cartItem.cartId);
   }
 
-  async removeCartItem(cartItemId: number): Promise<Cart> {
+  async removeCartItem(cartItemId: number, userId: number): Promise<Cart> {
     const cartItem = await this.cartItemRepository.findOneOrFail({
       where: { id: cartItemId },
       relations: ['cart'],
     });
+
+    if (cartItem.cart.userId !== userId) {
+      throw new ForbiddenException('You do not have access to this cart item');
+    }
 
     const cartId = cartItem.cartId;
     await this.cartItemRepository.remove(cartItem);

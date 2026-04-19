@@ -324,7 +324,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cart/{sessionId}/checkout": {
+    "/cart/checkout": {
         parameters: {
             query?: never;
             header?: never;
@@ -340,7 +340,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cart/{sessionId}/complete": {
+    "/cart/complete": {
         parameters: {
             query?: never;
             header?: never;
@@ -656,7 +656,6 @@ export interface components {
         UpdateCartItemDto: {
             quantity: number;
         };
-        DeleteCartDto: Record<string, never>;
         CheckoutCartDto: {
             items: components["schemas"]["CartItem"][];
             paymentMethods: string[];
@@ -712,7 +711,6 @@ export type Cart = components['schemas']['Cart'];
 export type CartItem = components['schemas']['CartItem'];
 export type AddToCartDto = components['schemas']['AddToCartDto'];
 export type UpdateCartItemDto = components['schemas']['UpdateCartItemDto'];
-export type DeleteCartDto = components['schemas']['DeleteCartDto'];
 export type CheckoutCartDto = components['schemas']['CheckoutCartDto'];
 export type CompleteCheckoutDto = components['schemas']['CompleteCheckoutDto'];
 export type CompleteCheckoutResponseDto = components['schemas']['CompleteCheckoutResponseDto'];
@@ -1408,9 +1406,7 @@ export interface operations {
     };
     CartController_getCart: {
         parameters: {
-            query?: {
-                sessionId?: string;
-            };
+            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
@@ -1442,11 +1438,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DeleteCartDto"];
-            };
-        };
+        requestBody?: never;
         responses: {
             default: {
                 headers: {
@@ -1558,9 +1550,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                sessionId: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -1587,9 +1577,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                sessionId: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
