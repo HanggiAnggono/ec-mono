@@ -1,7 +1,7 @@
 import { useThemes } from '@/shared/hooks/use-themes'
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
 import clsx from 'clsx'
-import { Pressable, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 
 export const MainTabBar = (props: BottomTabBarProps) => {
   const tabs = Object.entries(props.descriptors)
@@ -9,7 +9,7 @@ export const MainTabBar = (props: BottomTabBarProps) => {
   const { text, primary } = useThemes()
 
   return (
-    <View className="flex flex-row justify-between items-center mx-10 bg-background rounded-full absolute bottom-4 left-4 right-4 shadow-lg shadow-red-400 h-20">
+    <View className="flex flex-row justify-between items-center mx-10 bg-background rounded-[2rem] absolute bottom-4 left-4 right-4 shadow-lg shadow-red-400 p-4">
       {tabs.map((tab, i) => {
         const [tabKey, descriptor] = tab
         const isActive = i === activeTabIndex
@@ -31,15 +31,20 @@ export const MainTabBar = (props: BottomTabBarProps) => {
             key={tabKey}
             onPress={handlePress}
             className={clsx(
-              'rounded-full h-full flex flex-1 justify-center items-center px-5',
+              'rounded-xl h-full flex flex-1 gap-1 justify-center items-center p-2',
               isActive ? 'bg-primary' : ''
             )}
           >
             {descriptor.options.tabBarIcon?.({
               color: isActive ? text.toString() : primary.toString(),
               focused: isActive,
-              size: 30,
+              size: 20,
             })}
+            <Text
+              className={`text-sm ${isActive ? 'text-surface' : 'text-primary'}`}
+            >
+              {descriptor.route.name}
+            </Text>
           </Pressable>
         )
       })}

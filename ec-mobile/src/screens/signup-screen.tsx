@@ -1,11 +1,14 @@
 import { StackNavigationProp } from '@react-navigation/stack'
 import React, { useState } from 'react'
-import { Alert, Button, Text, TextInput, View } from 'react-native'
+import { Alert, Text, View } from 'react-native'
 import { RootStackParamList } from '.'
 import { useAuthSignup } from '@/shared/query/auth/use-auth-signup.mutation'
 import { useAccountStore, useAuthStore } from '@/store/auth.store'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCart } from '@/store/cart.store'
+import { Button } from '@/components/button'
+import Card from '@/components/card'
+import { TextInput } from '@/components/form/textinput'
 
 type SignupScreenProps = StackNavigationProp<RootStackParamList, 'Login'>
 
@@ -82,55 +85,53 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View className="flex-1 justify-center items-center bg-background p-4">
-      <Text className="text-2xl font-bold mb-6 text-text">Sign Up</Text>
-      <TextInput
-        className="w-full border border-gray-300 rounded p-2 mb-4 placeholder:text-text"
-        placeholder="Full Name"
-        value={fullname}
-        onChangeText={setFullname}
-        autoCapitalize="none"
-      />
-      <TextInput
-        className="w-full border border-gray-300 rounded p-2 mb-4 placeholder:text-text"
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-      />
-      <TextInput
-        className="w-full border border-gray-300 rounded p-2 mb-4 placeholder:text-text"
-        placeholder="Phone Number"
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-      />
-      <TextInput
-        className="w-full border border-gray-300 rounded p-2 mb-4 placeholder:text-text"
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TextInput
-        className="w-full border border-gray-300 rounded p-2 mb-4 placeholder:text-text"
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
-      <Button
-        title="Create Your Account"
-        onPress={handleSignup}
-        disabled={isPending}
-      />
-      <View className="mt-4 flex flex-row items-center">
-        <Text className="text-text">Already have an account?</Text>
-        <Button
-          title="Log In"
-          onPress={() => navigation.goBack()}
-          color="#007BFF"
+      <Card className="w-full p-4">
+        <Text className="text-2xl font-bold mb-6 text-text">Sign Up</Text>
+        <TextInput
+          className="w-full placeholder:text-text"
+          placeholder="Full Name"
+          value={fullname}
+          onChangeText={setFullname}
+          autoCapitalize="none"
         />
-      </View>
+        <TextInput
+          className="w-full placeholder:text-text"
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+        />
+        <TextInput
+          className="w-full placeholder:text-text"
+          placeholder="Phone Number"
+          value={phone}
+          onChangeText={setPhone}
+          keyboardType="phone-pad"
+        />
+        <TextInput
+          className="w-full placeholder:text-text"
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+        <TextInput
+          className="w-full placeholder:text-text"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
+        <Button variant="primary" onPress={handleSignup} disabled={isPending}>
+          Create Your Account
+        </Button>
+        <View className="mt-4 flex flex-row items-center">
+          <Text className="text-text">Already have an account?</Text>
+          <Button variant="ghost" onPress={() => navigation.goBack()}>
+            Log In
+          </Button>
+        </View>
+      </Card>
     </View>
   )
 }

@@ -148,7 +148,11 @@ export const ProductDetailPage = (props: StackScreenProp<'ProductDetail'>) => {
 
       <View className="absolute bottom-safe-or-20 right-safe-or-5 p-3  bg-background border border-primary rounded-full">
         <View className="flex flex-row justify-end gap-1">
-          <Button icon="message" className="flex items-center justify-center">
+          <Button
+            variant="ghost"
+            icon="message"
+            className="flex items-center justify-center"
+          >
             Chat
           </Button>
           <Button onPress={handleAddToCart}>
@@ -184,6 +188,7 @@ export const ProductDetailPage = (props: StackScreenProp<'ProductDetail'>) => {
           <View className="flex-row items-center mb-10 gap-4">
             <Text className="text-lg text-text ml-auto">Quantity</Text>
             <Button
+              variant="ghost"
               onPress={() => setQuantity(quantity - 1)}
               disabled={quantity <= 1}
             >
@@ -191,7 +196,10 @@ export const ProductDetailPage = (props: StackScreenProp<'ProductDetail'>) => {
               -{' '}
             </Button>
             <Text className="text-text">{quantity}</Text>
-            <Button onPress={() => setQuantity(quantity + 1)}> + </Button>
+            <Button variant="ghost" onPress={() => setQuantity(quantity + 1)}>
+              {' '}
+              +{' '}
+            </Button>
           </View>
           <Button
             className="self-end"

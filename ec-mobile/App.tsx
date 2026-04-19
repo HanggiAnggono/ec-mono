@@ -25,7 +25,7 @@ import { PaymentScreen } from '@/screens/payment-screen'
 import { OrdersScreen } from '@/screens/orders-screen'
 import { MainTabBar } from '@/components/main-tab-bar'
 import { useThemes } from '@/shared/hooks/use-themes'
-import {useColorScheme} from 'nativewind'
+import { useColorScheme } from 'nativewind'
 
 const Stack = createStackNavigator<RootStackParamList>()
 const HomeTab = createBottomTabNavigator()
@@ -33,7 +33,7 @@ const HomeTab = createBottomTabNavigator()
 function HomeNavigator() {
   const { token } = useAuthStore()
   const { primary } = useThemes()
-  const {colorScheme} = useColorScheme()
+  const { colorScheme } = useColorScheme()
   const text = colorScheme === 'dark' ? '#fff' : '#000'
 
   return (
@@ -59,7 +59,7 @@ function HomeNavigator() {
             backgroundColor: 'transparent',
           },
           tabBarIcon: ({ color, size, focused }) => (
-            <Icon name="product" color={color} size={size} />
+            <Icon name="home" color={color} size={size} />
           ),
         }}
       />
@@ -68,7 +68,7 @@ function HomeNavigator() {
         component={OrdersScreen}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="ordered-list" color={color} size={size} />
+            <Icon name="shopping" color={color} size={size} />
           ),
         }}
       />
@@ -78,7 +78,7 @@ function HomeNavigator() {
         navigationKey={token ? 'user' : 'guest'}
         options={{
           tabBarIcon: ({ color, size }) => (
-            <Icon name="setting" color={color} size={size} />
+            <Icon name="user" color={color} size={size} />
           ),
         }}
       />

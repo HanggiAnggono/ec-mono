@@ -91,6 +91,7 @@ export const CartScreen = (props: StackScreenProp<'Cart'>) => {
             <Text className="font-bold text-text">Price: {item.price}</Text>
             <View className="flex-row items-end">
               <Button
+                variant="ghost"
                 className="mt-2"
                 icon="delete"
                 onPress={() => handleRemoveItem(item)}
@@ -177,6 +178,7 @@ const QuantityStepper = ({
     <View className="flex-row items-center gap-2 mt-2">
       <Button
         className="px-2"
+        variant="ghost"
         onPress={() => setLocalValue(Math.max(min, localValue - 1))}
         disabled={disabled || localValue <= min}
       >
@@ -185,6 +187,7 @@ const QuantityStepper = ({
       <Text className="text-text">{localValue}</Text>
       <Button
         className="px-2"
+        variant="ghost"
         onPress={() => setLocalValue(localValue + 1)}
         disabled={disabled}
       >

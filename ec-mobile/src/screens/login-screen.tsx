@@ -1,7 +1,7 @@
 // Login screen
 import { StackNavigationProp } from '@react-navigation/stack'
 import React, { useState } from 'react'
-import { Alert, Text, TextInput, View } from 'react-native'
+import { Alert, Text, View } from 'react-native'
 import { RootStackParamList } from '.'
 import { Button } from '@/components/button'
 import { useAuthLogin } from '@/shared/query/auth/use-auth-login.mutation'
@@ -10,6 +10,7 @@ import { BottomSheet } from '@/components/bottom-sheet'
 import { useAccountStore, useAuthStore } from '@/store/auth.store'
 import Icon from '@/components/icon'
 import clsx from 'clsx'
+import { TextInput } from '@/components/form/textinput'
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -87,7 +88,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         ) : (
           <View className="w-full">
             <TextInput
-              className="w-full border border-gray-300 rounded p-2 mb-4"
+              // className="w-full border border-gray-300 rounded p-2 mb-4"
               placeholder="Username"
               placeholderTextColor="gray"
               value={username}
@@ -95,7 +96,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
               autoCapitalize="none"
             />
             <TextInput
-              className="w-full border border-gray-300 rounded p-2 mb-6 text-black"
+              // className="w-full border border-gray-300 rounded p-2 mb-6 text-black"
               placeholder="Password"
               placeholderTextColor="gray"
               value={password}
@@ -104,6 +105,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
             />
             <Button
               className="mx-auto"
+              variant="primary"
               onPress={handleLogin}
               disabled={isPending}
             >
@@ -115,15 +117,19 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
       <View className="flex flex-row items-center">
         <Text className="text-primary">Dont' have an account?</Text>
-        <Button onPress={() => navigation.navigate('Signup')}>Sign Up</Button>
+        <Button variant="ghost" onPress={() => navigation.navigate('Signup')}>
+          Sign Up
+        </Button>
       </View>
       <View className="mt-4 flex-row items-center">
         {accountList.length > 0 && (
-          <Button onPress={() => setIsAddAccount(!isAddAccount)}>
+          <Button variant="ghost" onPress={() => setIsAddAccount(!isAddAccount)}>
             {isAddAccount ? 'Use Existing Account' : 'User Another Account'}
           </Button>
         )}
-        <Button onPress={() => navigation.replace('Home')}>Skip login</Button>
+        <Button variant="ghost" onPress={() => navigation.replace('Home')}>
+          Skip login
+        </Button>
       </View>
       <BottomSheet isOpen={!!error} setIsOpen={reset}>
         <View className="flex justify-center items-center">

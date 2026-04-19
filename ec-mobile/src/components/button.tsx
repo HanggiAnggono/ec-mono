@@ -7,13 +7,13 @@ const buttonVariants = {
   primary: {
     btn: 'bg-primary',
     text: 'text-surface',
-    icon: 'white',
+    icon: 'text-surface',
     pressed: { btn: 'bg-primary/40', text: '' },
   },
-  default: {
+  ghost: {
     btn: '',
     text: 'text-text',
-    icon: '',
+    icon: 'text-text',
     pressed: { btn: 'bg-primary/40', text: 'text-surface' },
   },
 }
@@ -56,7 +56,10 @@ export const Button = ({
               <Icon
                 name={icon}
                 size={20}
-                className={pressed ? 'text-white' : 'text-blue-500'}
+                className={clsx(
+                  variant.icon,
+                  pressed ? 'text-white' : 'text-blue-500'
+                )}
               />
             )}
             <Text

@@ -18,10 +18,42 @@ import { Layout } from '@/layout/layout'
 import clsx from 'clsx'
 import Icon from '@/components/icon'
 import { LinearGradient } from '@/components/gradient'
+import { useThemes } from '@/shared/hooks/use-themes'
+
+const withOpacity = (color: string, opacity: number) => {
+  if (color.startsWith('#')) {
+    let hex = color.slice(1)
+
+    if (hex.length === 3) {
+      hex = hex
+        .split('')
+        .map((char) => char + char)
+        .join('')
+    }
+
+    if (hex.length === 6) {
+      const r = parseInt(hex.slice(0, 2), 16)
+      const g = parseInt(hex.slice(2, 4), 16)
+      const b = parseInt(hex.slice(4, 6), 16)
+
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`
+    }
+  }
+
+  const rgbMatch = color.match(/rgba?\(([^)]+)\)/)
+
+  if (rgbMatch) {
+    const [r, g, b] = rgbMatch[1].split(',').map((value) => value.trim())
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`
+  }
+
+  return color
+}
 
 export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
   navigation,
 }) => {
+  const { primary } = useThemes()
   const { data: cart } = useGetCart()
   const {
     mutateAsync: checkout,
@@ -37,12 +69,24 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
 
   useEffect(() => {
     if (cart?.sessionId) {
-      checkout({ params: { path: { sessionId: cart.sessionId } } })
+      checkout({})
     }
   }, [cart?.sessionId])
 
   const items = checkoutData?.items || []
   const payments = checkoutData?.paymentMethods || []
+  const paymentMethodLabels = {
+    direct_transfer: 'Direct Transfer',
+    debit_credit: 'Debit/Credit Card',
+    ecpoint: 'EC Point',
+  }
+  const primaryColor = primary.toString()
+  const selectedPaymentGradient = [
+    withOpacity(primaryColor, 1),
+    withOpacity(primaryColor, 0.77),
+    withOpacity(primaryColor, 0.52),
+    withOpacity(primaryColor, 0),
+  ] as const
 
   function handlePurchase() {
     if (!cart) return
@@ -50,7 +94,10 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
       body: { paymentMethod: payment },
       params: { path: { sessionId: cart?.sessionId } },
     }).then((resp) => {
-      navigation.navigate('Payment', { orderId: resp.orderId, transactionToken: resp.transactionToken })
+      navigation.navigate('Payment', {
+        orderId: resp.orderId,
+        transactionToken: resp.transactionToken,
+      })
     })
   }
 
@@ -116,16 +163,11 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
                               'z-20'
                             )}
                           >
-                            {method}
+                            {paymentMethodLabels[method]}
                           </Text>
                           {selected ? (
                             <LinearGradient
-                              colors={[
-                                'rgb(0,100,0)',
-                                'rgba(45, 210, 45, 0.773)',
-                                'rgba(96, 201, 96, 0.521)',
-                                'rgba(255, 255, 255, 0)',
-                              ]}
+                              colors={selectedPaymentGradient}
                               start={{ x: 0, y: 0 }}
                               end={{ x: 1, y: 0 }}
                               locations={[0, 0.4, 0.6, 1]}
@@ -140,7 +182,7 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
                           ) : null}
                           {selected ? (
                             <Icon
-                              className="absolute right-0"
+                              className="absolute right-5 color-primary"
                               name="check"
                               size={20}
                             />
