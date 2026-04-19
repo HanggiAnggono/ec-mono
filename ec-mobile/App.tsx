@@ -63,15 +63,17 @@ function HomeNavigator() {
           ),
         }}
       />
-      <HomeTab.Screen
-        name={Routes.Orders}
-        component={OrdersScreen}
-        options={{
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="shopping" color={color} size={size} />
-          ),
-        }}
-      />
+      {token ? (
+        <HomeTab.Screen
+          name={Routes.Orders}
+          component={OrdersScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Icon name="shopping" color={color} size={size} />
+            ),
+          }}
+        />
+      ) : null}
       <HomeTab.Screen
         name={Routes.Setting}
         component={SettingScreen}
@@ -170,12 +172,6 @@ export default function App() {
         >
           {!token ? (
             <>
-              {/* <Stack.Screen
-                name={Routes.Onboarding}
-                options={{ headerShown: false }}
-                component={OnboardingScreen}
-              /> */}
-              {/* login screen */}
               <Stack.Screen
                 name={Routes.Login}
                 component={LoginScreen}
@@ -184,7 +180,6 @@ export default function App() {
                   headerLeftContainerStyle: { opacity: 0 },
                 }}
               />
-              {/* signup screen */}
               <Stack.Screen
                 name={Routes.Signup}
                 component={SignupScreen}
@@ -194,27 +189,28 @@ export default function App() {
                 }}
               />
             </>
-          ) : (
+          ) : null}
+          <Stack.Screen
+            name={Routes.HomeTab}
+            component={HomeNavigator}
+            navigationKey={token ? 'user' : 'guest'}
+            options={{
+              title: '',
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name={Routes.ProductDetail}
+            options={{ title: 'Product Detail' }}
+            component={ProductDetailPage}
+          />
+          <Stack.Screen
+            name={Routes.Cart}
+            options={{ title: 'Your Cart' }}
+            component={CartScreen}
+          />
+          {token ? (
             <>
-              <Stack.Screen
-                name={Routes.HomeTab}
-                component={HomeNavigator}
-                navigationKey={token ? 'user' : 'guest'}
-                options={{
-                  title: '',
-                  headerShown: false,
-                }}
-              />
-              <Stack.Screen
-                name={Routes.ProductDetail}
-                options={{ title: 'Product Detail' }}
-                component={ProductDetailPage}
-              />
-              <Stack.Screen
-                name={Routes.Cart}
-                options={{ title: 'Your Cart' }}
-                component={CartScreen}
-              />
               <Stack.Screen
                 name={Routes.Checkout}
                 options={{ title: 'Checkout' }}
@@ -226,7 +222,7 @@ export default function App() {
                 component={PaymentScreen}
               />
             </>
-          )}
+          ) : null}
         </Stack.Navigator>
       </NavigationContainer>
     </QueryClientProvider>

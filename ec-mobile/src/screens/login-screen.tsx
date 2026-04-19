@@ -127,7 +127,7 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
             {isAddAccount ? 'Use Existing Account' : 'User Another Account'}
           </Button>
         )}
-        <Button variant="ghost" onPress={() => navigation.replace('Home')}>
+        <Button variant="ghost" onPress={() => navigation.replace('HomeTab')}>
           Skip login
         </Button>
       </View>
