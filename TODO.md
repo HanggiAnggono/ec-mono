@@ -8,7 +8,7 @@ This is a full-stack e-commerce application with:
 - **Payment Service**: FastAPI with Midtrans integration
 - **Infrastructure**: Docker Compose for local development
 
-**Current Status**: ~70-80% complete. Core features implemented, but authentication integration and some endpoints need finishing.
+**Current Status**: ~75-85% complete. Core cart authentication and themed mobile checkout/auth UI are now in place, with payment status, guest cart merge, and a few mobile cleanup tasks still pending.
 
 ---
 
@@ -16,33 +16,24 @@ This is a full-stack e-commerce application with:
 
 ### 1. ✅ Implement JWT Authentication in Cart Endpoints
 
-**Status**: Not Started
+**Status**: Completed
 **Files**:
-- `ec-be-core/src/cart/cart.controller.ts` (lines 25, 52-53, 86)
-- `ec-be-core/src/cart/cart.service.ts` (if exists)
+- `ec-be-core/src/cart/cart.controller.ts`
+- `ec-be-core/src/cart/cart.service.ts`
+- `ec-mobile/src/shared/query/cart/use-cart-checkout-cart.mutation.ts`
+- `ec-mobile/src/shared/query/cart/use-cart-complete-checkout.mutation.ts`
+- `ec-mobile/src/shared/types/api.ts`
 
-**What's Wrong**:
-- Cart endpoints don't properly extract user ID from JWT tokens
-- Session typing is incomplete
-- Guest cart merge feature can't work without auth
+**What Was Done**:
+- Cart controller actions now read the authenticated user from the request and scope cart access to that user.
+- Checkout and complete-checkout endpoints now use authenticated cart lookup instead of taking `sessionId` in the route.
+- Cart service now rejects cart item updates/removals from other users with `ForbiddenException`.
+- Mobile checkout mutations and generated API types were updated to match the new authenticated endpoints.
 
-**What Needs to be Done**:
-1. **Add proper session typing** (line 25)
-   - Define a proper `Session` interface that includes authenticated user context
-   - Currently uses generic session type without user info
-
-2. **Extract user from JWT in addToCart** (line 52-53)
-   - Use NestJS guards or decorators to get authenticated user from request
-   - Pass user ID to cart service instead of getting it from session
-   - Ensure cart items are associated with the authenticated user
-
-3. **Extract user from JWT in getCart** (line 86)
-   - Retrieve cart only for the authenticated user
-   - Validate user ID matches the requested cart owner
-
-4. **Update cart service**
-   - Modify service methods to accept user ID parameter
-   - Ensure all cart operations are user-scoped
+**Follow-up Notes**:
+1. Review guest cart merge now that auth-based cart flows are active.
+2. Consider tightening request typing around `req.user` and `req.session`.
+3. Add or expand tests around forbidden cart item access and authenticated checkout flow.
 
 **Why It Matters**:
 - Without this, cart data can leak between users
@@ -116,7 +107,7 @@ Payment service returns: { status: "pending", amount: 50000, midtrans_id: "..." 
 
 ### 3. 🔄 Implement Guest Cart Merge Functionality
 
-**Status**: Not Started (Blocked by Task #1)
+**Status**: Not Started
 **Files**:
 - `ec-be-core/src/cart/cart.controller.ts` (line 83)
 - `ec-be-core/src/cart/cart.service.ts`
@@ -215,6 +206,28 @@ const { data: orders } = useQuery(
   () => api.getOrders({ status, page, limit: 10 })
 );
 ```
+
+---
+
+## Cleanup / Polish
+
+### 9. 🧹 Remove Placeholder and Debugging Code From Mobile App
+
+**Status**: Not Started
+**Files**:
+- `ec-mobile/App.tsx`
+- `ec-mobile/src/screens/cart-screen.tsx`
+- `ec-mobile/src/screens/checkout-screen.tsx`
+- `ec-mobile/src/screens/product-detail-screen.tsx`
+- `ec-mobile/src/screens/login-screen.tsx`
+
+**What's Left**:
+- Replace `picsum.photos` placeholder image URLs with real product/media data or a deliberate fallback asset.
+- Remove the `console.log` token refresh failure log in `App.tsx` if it is no longer needed in runtime.
+- Delete commented-out legacy `className` lines in `login-screen.tsx`.
+
+**Why It Matters**:
+- These are easy-to-forget hardcoded/debug leftovers that can leak into demos and production builds.
 
 ---
 
