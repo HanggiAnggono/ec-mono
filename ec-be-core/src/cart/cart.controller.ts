@@ -14,7 +14,10 @@ import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 import { Cart } from './entities/cart.entity';
 import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { CheckoutCartDto } from './dto/checkout-cart.dto';
-import { CompleteCheckoutDto } from './dto/complete-checkout.dto';
+import {
+  CompleteCheckoutDto,
+  CompleteCheckoutResponseDto,
+} from './dto/complete-checkout.dto';
 import { Order } from 'src/order/entities/order.entity';
 import { BaseAuthController } from 'src/auth/auth.controller';
 
@@ -89,7 +92,7 @@ export class CartController extends BaseAuthController {
     return this.cartService.checkoutCart(cart.sessionId);
   }
 
-  @ApiOkResponse({ type: () => Order })
+  @ApiOkResponse({ type: () => CompleteCheckoutResponseDto })
   @ApiBody({ type: () => CompleteCheckoutDto })
   @Post('complete')
   async completeCheckout(@Request() req, @Body() data: CompleteCheckoutDto) {

@@ -11,5 +11,5 @@ class PaymentProvider(ABC):
         pass
 
     @abstractmethod
-    def get_status(self, order_id: str) -> Dict[str, Any]:
+    def get_status(self, transaction_id: str) -> Dict[str, Any]:
         pass

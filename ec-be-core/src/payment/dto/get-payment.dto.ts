@@ -23,13 +23,20 @@ export enum PaymentType {
   CARD = 'card',
   BANK_TRANSFER = 'bank_transfer',
   E_WALLET = 'e_wallet',
+  OTHER = 'other',
   // extend with project payment type values
 }
 
 export enum TransactionStatus {
+  CAPTURE = 'capture',
   PENDING = 'pending',
   SUCCESS = 'success',
   FAILED = 'failed',
+  SETTLEMENT = 'settlement',
+  FAILURE = 'failure',
+  CANCEL = 'cancel',
+  DENY = 'deny',
+  EXPIRE = 'expire',
   // extend as needed
 }
 

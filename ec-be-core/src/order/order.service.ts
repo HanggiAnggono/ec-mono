@@ -78,6 +78,11 @@ export class OrderService {
     return await this.orderRepository.findOneOrFail({ where: { id } });
   }
 
+  async updateStatus(id: string, status: Order['order_status']): Promise<Order> {
+    await this.orderRepository.update(id, { order_status: status });
+    return await this.orderRepository.findOneOrFail({ where: { id } });
+  }
+
   async remove(id: string): Promise<void> {
     await this.orderRepository.delete(id);
   }
