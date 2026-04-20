@@ -60,39 +60,58 @@ addToCart(@CurrentUser() user: User, @Body() dto: AddToCartDto) {
 
 ### 2. 🐛 Fix Transaction Status Lookup Bug in Payment Service
 
-**Status**: Not Started
+**Status**: In Progress
 **Files**:
-- `ec-payment/src/ec_payment/rest.http` (line 17 - test endpoint)
-- `ec-payment/src/ec_payment/` (API implementation)
+- `ec-payment/src/ec_payment/provider/midtrans_provider.py`
+- `ec-payment/src/ec_payment/services/payment_service.py`
+- `ec-payment/src/ec_payment/model/payment.py`
+- `ec-payment/src/ec_payment/main.py`
+- `ec-payment/src/ec_payment/rest.http`
 
 **What's Wrong**:
-- GET `/transaction/{order_id}` endpoint returns 404 when fetching transaction status
-- Mobile app and backend can't check payment status
-- Order fulfillment can't proceed properly
+- Docker startup is now fixed and `POST /create-payment` works end-to-end.
+- `GET /transaction/{order_id}` currently returns `500`.
+- `POST /handle-webhook` currently returns `500`.
+- Payment rows are being persisted, but status lookup and webhook persistence are incorrect.
 
 **What Needs to be Done**:
-1. **Investigate the 404 error**
-   - Check if transactions are being saved to database
-   - Verify order_id parameter is being passed correctly
-   - Look for any error handling that might be swallowing exceptions
+1. **Fix Midtrans status lookup identifier mismatch**
+   - Current code calls `core_api.transactions.status(order_id)` in `midtrans_provider.py`.
+   - Live test showed Midtrans returns `404 Transaction doesn't exist` for our local order id `codex-order-001`.
+   - Retrieve the payment row first, then decide whether Midtrans should be queried by stored `transaction_id` or by merchant order id supported by the API contract.
+   - Avoid calling Midtrans with an identifier we already know is not accepted in this flow.
 
-2. **Verify database query logic**
-   - Ensure transaction records are created when payments are initiated
-   - Check the query uses correct field names (order_id vs transaction_id)
-   - Verify foreign key relationships are correct
+2. **Fix webhook insert bug**
+   - `payment.id` uses `default=uuid4().__str__()` which is evaluated once at import time.
+   - Live webhook test failed with `duplicate key value violates unique constraint "payment_pkey"`.
+   - Change the model to generate a fresh UUID per row.
 
-3. **Debug Midtrans integration**
-   - Verify Midtrans transaction IDs are stored correctly
-   - Check if we're querying by the right identifier
+3. **Stop creating duplicate payment rows on webhook**
+   - Webhook handler currently always inserts a new `Payment`.
+   - It should locate the existing payment by `order_id` or `transaction_id` and update status, method, and metadata instead.
 
-4. **Test the endpoint**
-   - Use valid order IDs from the database
-   - Verify response includes transaction status, amount, and Midtrans details
+4. **Return proper API errors**
+   - `GET /transaction/{order_id}` should translate Midtrans 404s and internal failures into structured HTTP errors instead of generic 500 exceptions.
+   - `POST /create-payment` currently returns HTTP 200 even on internal failure payloads; tighten error semantics.
+
+5. **Retest live flow after fixes**
+   - `POST /create-payment`
+   - `GET /transaction/{order_id}`
+   - `POST /handle-webhook`
+   - Verify Postgres rows update correctly after webhook delivery
 
 **Why It Matters**:
 - Users need to see payment status after checkout
 - Backend needs to reconcile order status with payment status
 - Payment webhooks depend on this working
+
+**Latest Findings From Live Docker Test**:
+- `POST /create-payment` returned `200 OK` and persisted a payment row in Postgres.
+- Persisted row:
+  - `order_id = codex-order-001`
+  - `transaction_id = 05b4402b-68e1-41e5-a7e2-c33e98ab7bb6`
+- `GET /transaction/codex-order-001` failed because Midtrans returned `404 Transaction doesn't exist`.
+- `POST /handle-webhook` failed because of a duplicate primary key on `payment.id`.
 
 **How It Should Work**:
 ```
