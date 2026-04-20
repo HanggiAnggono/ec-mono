@@ -63,17 +63,15 @@ function HomeNavigator() {
           ),
         }}
       />
-      {token ? (
-        <HomeTab.Screen
-          name={Routes.Orders}
-          component={OrdersScreen}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <Icon name="shopping" color={color} size={size} />
-            ),
-          }}
-        />
-      ) : null}
+      <HomeTab.Screen
+        name={Routes.Orders}
+        component={OrdersScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="shopping" color={color} size={size} />
+          ),
+        }}
+      />
       <HomeTab.Screen
         name={Routes.Setting}
         component={SettingScreen}

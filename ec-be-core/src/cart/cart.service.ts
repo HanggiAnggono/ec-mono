@@ -368,6 +368,10 @@ export class CartService {
       description: `Order ${order.id} via ${paymentMethod}`,
     });
 
-    return { orderId: order.id, transactionToken: payment.transaction_token };
+    return {
+      orderId: order.id,
+      transactionToken: payment.transaction_token,
+      redirectUrl: payment.redirect_url,
+    };
   }
 }

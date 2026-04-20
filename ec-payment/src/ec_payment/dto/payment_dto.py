@@ -4,6 +4,30 @@ from pydantic import BaseModel, Field
 from typing import Literal, Optional, Dict, Any
 
 
+class Currency(str, Enum):
+    IDR = "IDR"
+    # Add other currencies if supported
+
+
+class PaymentType(str, Enum):
+    QRIS = "qris"
+    GOPAY = "gopay"
+    CREDIT_CARD = "credit_card"
+    BANK_TRANSFER = "bank_transfer"
+    SHOPEEPAY = "shopeepay"
+    OTHER = "other"
+
+
+class TransactionStatus(str, Enum):
+    CAPTURE = "capture"
+    SETTLEMENT = "settlement"
+    PENDING = "pending"
+    FAILURE = "failure"
+    CANCEL = "cancel"
+    DENY = "deny"
+    EXPIRE = "expire"
+
+
 class CustomerDTO(BaseModel):
     first_name: str = Field(..., description="Customer first name")
     last_name: str = Field(..., description="Customer last name")
@@ -33,7 +57,7 @@ class PaymentWebhookRequestDTO(BaseModel):
     status_message: str = Field(...)
     status_code: str = Field(...)
     signature_key: str = Field(...)
-    settlement_time: datetime = Field(...)
+    settlement_time: Optional[datetime] = Field(None)
     payment_type: str = Field(...)
     order_id: str = Field(..., description="Order identifier")
     merchant_id: str = Field(...)
@@ -66,19 +90,5 @@ class PaymentStatusResponseDTO(BaseModel):
 
     # Dates are parsed automatically into datetime objects if format is correct
     transaction_time: datetime = Field(..., description="The time the transaction was initiated.")
-    settlement_time: datetime = Field(..., description="The time the transaction was successfully settled.")
-    expiry_time: datetime = Field(..., description="The time the payment request would have expired.")
-
-# 1. Define specific ENUMS for certain fields
-class Currency(str, Enum):
-    IDR = "IDR"
-    # Add other currencies if supported
-
-class PaymentType(str, Enum):
-    QRIS = "qris"
-    # Add other payment types
-
-class TransactionStatus(str, Enum):
-    SETTLEMENT = "settlement"
-    PENDING = "pending"
-    FAILURE = "failure"
+    settlement_time: Optional[datetime] = Field(None, description="The time the transaction was successfully settled.")
+    expiry_time: Optional[datetime] = Field(None, description="The time the payment request would have expired.")

@@ -1,6 +1,13 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  forwardRef,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
+import { OrderStatus } from 'src/order/entities/order.entity';
 import { OrderService } from 'src/order/order.service';
 import { DataSource } from 'typeorm';
 import {
@@ -38,10 +45,55 @@ export class PaymentService {
   }
 
   async getPayment(orderId: string) {
-    const resp = await axios.get<GetPaymentDto>(
-      this.configService.get('paymentSvcHost')! + '/transaction/' + orderId,
+    return this.fetchPayment(orderId);
+  }
+
+  async syncPaymentStatus(orderId: string) {
+    const payment = await this.fetchPayment(orderId, true);
+    const orderStatus = this.mapTransactionStatusToOrderStatus(
+      payment.transaction_status,
     );
 
-    return resp.data;
+    await this.orderSvc.updateStatus(orderId, orderStatus);
+
+    return payment;
+  }
+
+  private async fetchPayment(orderId: string, refresh = false) {
+    const respUrl =
+      this.configService.get('paymentSvcHost')! +
+      '/transaction/' +
+      orderId +
+      (refresh ? '/sync' : '');
+
+    try {
+      const resp = await axios.get<GetPaymentDto>(respUrl);
+      return resp.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        throw new BadGatewayException(error.response.data);
+      }
+
+      throw new InternalServerErrorException('Failed to fetch payment status');
+    }
+  }
+
+  private mapTransactionStatusToOrderStatus(
+    status: GetPaymentDto['transaction_status'],
+  ): OrderStatus {
+    switch (status) {
+      case 'settlement':
+      case 'capture':
+        return OrderStatus.PAYMENT_RECEIVED;
+      case 'expire':
+        return OrderStatus.EXPIRED;
+      case 'cancel':
+        return OrderStatus.CANCELLED;
+      case 'deny':
+      case 'failure':
+        return OrderStatus.FAILED;
+      default:
+        return OrderStatus.PENDING_PAYMENT;
+    }
   }
 }

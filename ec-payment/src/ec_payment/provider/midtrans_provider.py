@@ -1,4 +1,5 @@
 from midtransclient import Snap, CoreApi
+from midtransclient.error_midtrans import MidtransAPIError
 from typing import Any
 import os
 import logging
@@ -90,28 +91,30 @@ class MidtransProvider(PaymentProvider):
             logger.error(f"Failed to process webhook: {str(e)}")
             raise Exception(f"Failed to process webhook: {str(e)}")
 
-    def get_status(self, order_id: str) -> dict[str, Any]:
+    def get_status(self, reference_id: str) -> dict[str, Any]:
         """
         Get transaction status from Midtrans
 
         Args:
-            order_id: Order identifier to check status for
+            reference_id: Midtrans transaction or order identifier to check status for
 
         Returns:
             dict containing transaction status information
         """
         try:
-            logger.info(f"Getting transaction status for order_id: {order_id}")
+            logger.info(f"Getting transaction status for reference_id: {reference_id}")
 
             # Get transaction status from Midtrans
-            status_response = core_api.transactions.status(order_id)
+            status_response = core_api.transactions.status(reference_id)
 
-            logger.info(f"Retrieved transaction status for order_id: {order_id}")
+            logger.info(f"Retrieved transaction status for reference_id: {reference_id}")
             return status_response
 
+        except MidtransAPIError:
+            raise
         except Exception as e:
             logger.error(
-                f"Failed to get transaction status for order_id: {order_id}, error: {str(e)}"
+                f"Failed to get transaction status for reference_id: {reference_id}, error: {str(e)}"
             )
             raise Exception(f"Failed to get transaction status: {str(e)}")
 
@@ -119,11 +122,17 @@ class MidtransProvider(PaymentProvider):
         match status:
             case "settlement":
                 return PaymentStatus.COMPLETED
+            case "capture":
+                return PaymentStatus.COMPLETED
             case "pending":
                 return PaymentStatus.PENDING
             case "failure":
                 return PaymentStatus.FAILED
+            case "deny":
+                return PaymentStatus.FAILED
             case "cancel":
+                return PaymentStatus.CANCELLED
+            case "expire":
                 return PaymentStatus.CANCELLED
             case _:
                 logger.error(f"Unknown transaction status: {status}")

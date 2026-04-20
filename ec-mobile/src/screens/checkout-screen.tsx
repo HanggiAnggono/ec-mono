@@ -90,13 +90,18 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
 
   function handlePurchase() {
     if (!cart) return
+    if (!payment) {
+      Alert.alert('Payment method required', 'Please select a payment method.')
+      return
+    }
+
     complete({
       body: { paymentMethod: payment },
-      params: { path: { sessionId: cart?.sessionId } },
     }).then((resp) => {
       navigation.navigate('Payment', {
         orderId: resp.orderId,
         transactionToken: resp.transactionToken,
+        redirectUrl: resp.redirectUrl,
       })
     })
   }

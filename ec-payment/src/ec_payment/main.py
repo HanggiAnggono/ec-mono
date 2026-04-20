@@ -47,6 +47,12 @@ async def handle_webhook(webhook_request: PaymentWebhookRequestDTO, db: Session 
 
 
 @app.get("/transaction/{order_id}", response_model=PaymentStatusResponseDTO)
-async def get_transaction(order_id: str):
-    order = payment_svc.get_status(order_id=order_id)
+async def get_transaction(order_id: str, db: Session = Depends(get_session)):
+    order = payment_svc.get_status(order_id=order_id, db=db)
+    return order
+
+
+@app.get("/transaction/{order_id}/sync", response_model=PaymentStatusResponseDTO)
+async def sync_transaction(order_id: str, db: Session = Depends(get_session)):
+    order = payment_svc.get_status(order_id=order_id, db=db, refresh=True)
     return order

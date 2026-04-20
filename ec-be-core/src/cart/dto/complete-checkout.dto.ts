@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CompleteCheckoutDto {
   @IsString()
@@ -7,9 +7,12 @@ export class CompleteCheckoutDto {
 }
 
 export class CompleteCheckoutResponseDto {
-  @IsNumber()
+  @IsString()
   orderId: string;
 
   @IsString()
   transactionToken?: string;
+
+  @IsString()
+  redirectUrl?: string;
 }
