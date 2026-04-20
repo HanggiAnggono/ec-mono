@@ -2,7 +2,7 @@
 import { StackNavigationProp } from '@react-navigation/stack'
 import React, { useState } from 'react'
 import { Alert, Text, View } from 'react-native'
-import { RootStackParamList } from '.'
+import { RootStackParamList, Routes } from '.'
 import { Button } from '@/components/button'
 import { useAuthLogin } from '@/shared/query/auth/use-auth-login.mutation'
 import { useAuthRefreshToken } from '@/shared/query/auth/use-auth-refresh-token.mutation'
@@ -123,11 +123,19 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
       </View>
       <View className="mt-4 flex-row items-center">
         {accountList.length > 0 && (
-          <Button variant="ghost" onPress={() => setIsAddAccount(!isAddAccount)}>
+          <Button
+            variant="ghost"
+            onPress={() => setIsAddAccount(!isAddAccount)}
+          >
             {isAddAccount ? 'Use Existing Account' : 'User Another Account'}
           </Button>
         )}
-        <Button variant="ghost" onPress={() => navigation.replace('HomeTab')}>
+        <Button
+          variant="ghost"
+          onPress={() =>
+            navigation.reset({ routes: [{ name: Routes.HomeTab }] })
+          }
+        >
           Skip login
         </Button>
       </View>

@@ -1,7 +1,7 @@
 import { StackNavigationProp } from '@react-navigation/stack'
 import React, { useState } from 'react'
 import { Alert, Text, View } from 'react-native'
-import { RootStackParamList } from '.'
+import { RootStackParamList, Routes } from '.'
 import { useAuthSignup } from '@/shared/query/auth/use-auth-signup.mutation'
 import { useAccountStore, useAuthStore } from '@/store/auth.store'
 import { useQueryClient } from '@tanstack/react-query'
@@ -127,7 +127,10 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
         </Button>
         <View className="mt-4 flex flex-row items-center">
           <Text className="text-text">Already have an account?</Text>
-          <Button variant="ghost" onPress={() => navigation.goBack()}>
+          <Button
+            variant="ghost"
+            onPress={() => navigation.navigate(Routes.Login)}
+          >
             Log In
           </Button>
         </View>
