@@ -162,7 +162,6 @@ export default function App() {
     <QueryClientProvider client={client}>
       <NavigationContainer>
         <Stack.Navigator
-          key={token ? 'user' : 'guest'}
           screenOptions={{
             headerStyle: {
               backgroundColor: primary,
