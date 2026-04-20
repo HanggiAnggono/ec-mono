@@ -6,6 +6,7 @@ import { useGetCart } from '@/module/cart/usecases/use-get-cart'
 import { useCartAddToCart } from '@/shared/query/cart/use-cart-add-to-cart.mutation'
 import { useCartUpdateCartItem } from '@/shared/query/cart/use-cart-update-cart-item.mutation'
 import { useProductsFindOne } from '@/shared/query/products/use-products-find-one.query'
+import { useAuthStore } from '@/store/auth.store'
 import { useCart } from '@/store/cart.store'
 import { useNavigation, useRoute } from '@react-navigation/native'
 import clsx from 'clsx'
@@ -26,6 +27,7 @@ export const ProductDetailPage = (props: StackScreenProp<'ProductDetail'>) => {
   const { id = '', variantId: initialVariantId } = props.route.params || {}
   const { data, isLoading } = useProductsFindOne({ params: { path: { id } } })
   const [isOpen, setIsOpen] = useState(false)
+  const { token } = useAuthStore()
   const { cartSessionId, setCartSessionId } = useCart()
   const { data: cart, refetch: refetchCart } = useGetCart()
   const { mutateAsync: addToCart, isPending, error } = useCartAddToCart()
@@ -50,11 +52,35 @@ export const ProductDetailPage = (props: StackScreenProp<'ProductDetail'>) => {
     navigation.setOptions({ title: data?.name })
   }, [variants, existingCartItem])
 
+  function redirectToSignup() {
+    Alert.alert(
+      'Sign up required',
+      'Please sign up or log in before adding items to your cart.',
+      [
+        {
+          text: 'OK',
+          onPress: () => navigation.navigate('Signup' as never),
+        },
+      ]
+    )
+  }
+
   function handleAddToCart() {
+    if (!token) {
+      redirectToSignup()
+      return
+    }
+
     setIsOpen(true)
   }
 
   async function handleSubmit() {
+    if (!token) {
+      setIsOpen(false)
+      redirectToSignup()
+      return
+    }
+
     try {
       if (existingCartItem) {
         await updateCartItem({
