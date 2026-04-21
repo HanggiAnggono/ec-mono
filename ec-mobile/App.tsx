@@ -22,6 +22,7 @@ import React, { useEffect } from 'react'
 import './global.css'
 import { CheckoutScreen } from '@/screens/checkout-screen'
 import { PaymentScreen } from '@/screens/payment-screen'
+import { OrderDetailScreen } from '@/screens/order-detail-screen'
 import { OrdersScreen } from '@/screens/orders-screen'
 import { MainTabBar } from '@/components/main-tab-bar'
 import { useThemes } from '@/shared/hooks/use-themes'
@@ -217,6 +218,11 @@ export default function App() {
                 name={Routes.Payment}
                 options={{ title: 'Payment' }}
                 component={PaymentScreen}
+              />
+              <Stack.Screen
+                name={Routes.OrderDetail}
+                options={{ title: 'Order Detail' }}
+                component={OrderDetailScreen}
               />
             </>
           ) : null}

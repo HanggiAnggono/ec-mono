@@ -92,3 +92,4 @@ class PaymentStatusResponseDTO(BaseModel):
     transaction_time: datetime = Field(..., description="The time the transaction was initiated.")
     settlement_time: Optional[datetime] = Field(None, description="The time the transaction was successfully settled.")
     expiry_time: Optional[datetime] = Field(None, description="The time the payment request would have expired.")
+    payment_url: Optional[str] = Field(None, description="Payment URL")

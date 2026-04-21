@@ -183,6 +183,7 @@ class PaymentService:
             if payment.status == PaymentStatus.COMPLETED
             else None,
             expiry_time=None,
+            payment_url=payment.payment_url,
         )
 
     def _map_payment_status(self, status: PaymentStatus) -> str:

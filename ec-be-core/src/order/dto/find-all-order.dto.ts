@@ -29,8 +29,8 @@ export class OrderDto {
   })
   order_status: OrderStatus;
 
-  @ApiProperty({ isArray: true, type: () => GetPaymentDto })
-  payment: GetPaymentDto[];
+  @ApiProperty({ isArray: true, type: () => GetPaymentDto, required: false })
+  payment: GetPaymentDto[] | null;
 }
 
 export class FindAllOrderDto extends withPagination(OrderDto) {

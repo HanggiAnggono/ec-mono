@@ -8,6 +8,7 @@ import { FindOneOrderDto } from './dto/find-one-order.dto';
 import { PageParamDto } from 'src/pagination/dto/pagination-param.dto';
 import { FindAllOrderDto } from './dto/find-all-order.dto';
 import { PaymentService } from 'src/payment/payment.service';
+import { GetPaymentDto } from 'src/payment/dto/get-payment.dto';
 
 @Injectable()
 export class OrderService {
@@ -42,10 +43,11 @@ export class OrderService {
     const payments = await Promise.all(paymentPromises);
 
     const data = orders.map((item) => {
-      const payment = payments.filter((p) => p.order_id === item.id);
+      const payment = payments
+        .filter((p): p is GetPaymentDto => p !== null && p.order_id === item.id);
       return {
         ...item,
-        payment: payment,
+        payment: payment.length > 0 ? payment : null,
       };
     });
 

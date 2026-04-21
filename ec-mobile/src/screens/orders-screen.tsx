@@ -1,42 +1,21 @@
 import Card from '@/components/card'
 import { Layout } from '@/layout/layout'
 import { formatCurrency } from '@/module/utils'
-import { OrderDto } from '@/shared/types/api'
-import { FlatList, Text, View } from 'react-native'
+import { useOrderFindAll } from '@/shared/query/order/use-order-find-all.query'
+import { OrderStatus } from '@/shared/types/api'
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+import { StackScreenProp } from '.'
 
-type MockOrder = Pick<
-  OrderDto,
-  'id' | 'orderDate' | 'order_status' | 'totalAmount'
->
+type OrderStatusKey = OrderStatus
 
-const mockOrders: MockOrder[] = [
-  {
-    id: 'codex-order-001',
-    orderDate: '2026-04-19T08:15:00.000Z',
-    order_status: 'pending_payment',
-    totalAmount: 125000,
-  },
-  {
-    id: 'codex-order-002',
-    orderDate: '2026-04-18T13:40:00.000Z',
-    order_status: 'payment_received',
-    totalAmount: 289000,
-  },
-  {
-    id: 'codex-order-003',
-    orderDate: '2026-04-17T17:05:00.000Z',
-    order_status: 'order_confirmed',
-    totalAmount: 76000,
-  },
-  {
-    id: 'codex-order-004',
-    orderDate: '2026-04-16T09:10:00.000Z',
-    order_status: 'cancelled',
-    totalAmount: 94000,
-  },
-]
-
-const statusStyles: Record<MockOrder['order_status'], string> = {
+const statusStyles: Record<OrderStatusKey, string> = {
   pending: 'bg-amber-500/15 text-amber-300',
   pending_payment: 'bg-amber-500/15 text-amber-300',
   payment_received: 'bg-emerald-500/15 text-emerald-300',
@@ -50,59 +29,127 @@ const statusStyles: Record<MockOrder['order_status'], string> = {
   cancelled: 'bg-neutral-500/15 text-neutral-300',
 }
 
-export const OrdersScreen = () => {
+const statusLabels: Record<OrderStatusKey, string> = {
+  pending: 'Pending',
+  pending_payment: 'Pending Payment',
+  payment_received: 'Paid',
+  order_confirmed: 'Confirmed',
+  failed: 'Failed',
+  expired: 'Expired',
+  awaiting_shipment: 'Shipping',
+  on_hold: 'On Hold',
+  awaiting_pickup: 'Awaiting Pickup',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+}
+
+export const OrdersScreen: React.FC<StackScreenProp<'Orders'>> = ({
+  navigation,
+}) => {
+  const { data, isFetching, refetch, isError } = useOrderFindAll(
+    {},
+    { enabled: true },
+  )
+
+  const orders = data?.data ?? []
+
   return (
     <Layout className="flex-1 bg-background">
       <FlatList
-        data={mockOrders}
+        data={orders}
         keyExtractor={(item) => item.id}
-        contentContainerClassName="px-4 pt-4 pb-32 gap-3"
+        contentContainerClassName="px-4 pt-4 pb-32 gap-4"
+        refreshControl={
+          <RefreshControl refreshing={isFetching} onRefresh={refetch} />
+        }
         ListHeaderComponent={
           <View className="mb-2">
-            <Text className="text-3xl font-black text-text">Orders</Text>
-            <Text className="text-sm text-text opacity-70 mt-1">
-              Mock tab list built from the current order schema only.
+            <Text className="text-3xl font-black text-[#e8eeff]">Orders</Text>
+            <Text className="text-sm text-[#c8d0e0] opacity-70 mt-1">
+              {data
+                ? `${data.totalRecords} order${data.totalRecords !== 1 ? 's' : ''}`
+                : 'Loading orders...'}
             </Text>
           </View>
         }
-        renderItem={({ item }) => (
-          <Card className="p-4 border border-background-200">
-            <View className="flex-row items-start justify-between gap-4">
-              <View className="flex-1">
-                <Text className="text-xs text-text opacity-60">
-                  Order {item.id}
-                </Text>
-                <Text className="text-lg font-bold text-text mt-1">
-                  {new Date(item.orderDate).toLocaleDateString()}
-                </Text>
-                <Text className="text-sm text-text opacity-70 mt-1">
-                  {item.order_status.replace(/_/g, ' ')}
-                </Text>
-              </View>
-              <View
-                className={`rounded-full px-3 py-1 self-start ${statusStyles[item.order_status]}`}
-              >
-                <Text className="text-xs font-semibold capitalize">
-                  {item.order_status.replace(/_/g, ' ')}
-                </Text>
-              </View>
+        ListEmptyComponent={
+          isFetching ? (
+            <View className="flex items-center justify-center py-20">
+              <ActivityIndicator size="large" />
             </View>
-
-            <View className="mt-4 flex-row items-end justify-between border-t border-background-200 pt-3">
-              <View>
-                <Text className="text-xs text-text opacity-60">
-                  Total Amount
-                </Text>
-                <Text className="text-base font-semibold text-text mt-1">
-                  {formatCurrency(item.totalAmount)}
-                </Text>
-              </View>
-              <Text className="text-xs text-text opacity-60">
-                No backend fetch on this screen
+          ) : isError ? (
+            <View className="flex items-center justify-center py-20">
+              <Text className="text-[#c8d0e0] opacity-60">
+                Failed to load orders. Pull to retry.
               </Text>
             </View>
-          </Card>
-        )}
+          ) : (
+            <View className="flex items-center justify-center py-20">
+              <Text className="text-[#c8d0e0] opacity-60">
+                No orders yet. Start shopping!
+              </Text>
+            </View>
+          )
+        }
+        renderItem={({ item }) => {
+          const firstItem = item.orderItems?.[0]
+          const extraCount = (item.orderItems?.length ?? 0) - 1
+          const statusKey = (item.order_status ?? 'pending') as OrderStatusKey
+
+          return (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('OrderDetail', {
+                  orderId: item.id,
+                })
+              }
+              activeOpacity={0.7}
+            >
+              <Card className="p-5 gap-3">
+                {/* Top row: order info + status */}
+                <View className="flex-row items-start justify-between gap-3">
+                  <View className="flex-1 gap-1">
+                    <Text className="text-[10px] font-bold tracking-widest text-primary/80">
+                      ORDER #{item.id.slice(0, 8).toUpperCase()}
+                    </Text>
+                    <Text className="text-base font-bold text-[#e8eeff]">
+                      {new Date(item.orderDate).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </Text>
+                  </View>
+                  <View
+                    className={`rounded-full px-3 py-1 self-start ${statusStyles[statusKey] ?? 'bg-zinc-500/15 text-zinc-300'}`}
+                  >
+                    <Text className="text-[10px] font-bold tracking-wider capitalize">
+                      {statusLabels[statusKey] ?? item.order_status}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Items preview */}
+                {firstItem ? (
+                  <Text
+                    className="text-sm text-[#c8d0e0]"
+                    numberOfLines={1}
+                  >
+                    {firstItem.productVariant?.product?.name ?? 'Item'}
+                    {' x'}
+                    {firstItem.quantity}
+                    {extraCount > 0 ? `  +${extraCount} more` : ''}
+                  </Text>
+                ) : null}
+
+                {/* Total */}
+                <Text className="text-lg font-bold text-[#e8eeff]">
+                  {formatCurrency(item.totalAmount)}
+                </Text>
+              </Card>
+            </TouchableOpacity>
+          )
+        }}
       />
     </Layout>
   )

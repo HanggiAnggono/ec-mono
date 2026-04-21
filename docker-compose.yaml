@@ -40,7 +40,7 @@ services:
       - /app/node_modules
     networks:
       - ecom-network
-    command: npm run start:dev
+    # command: npm run start:dev
 
   ec-payment:
     build:
@@ -54,6 +54,7 @@ services:
       PYTHONPATH: /app/src
     ports:
       - "8000:8000"
+      - "5678:5678"
     depends_on:
       postgres:
         condition: service_healthy
@@ -61,7 +62,7 @@ services:
       - ./ec-payment:/app
     networks:
       - ecom-network
-    command: uvicorn ec_payment.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/src
+    # command: uvicorn ec_payment.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/src
 
 volumes:
   postgres_data:
