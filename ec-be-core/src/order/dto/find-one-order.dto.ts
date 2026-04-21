@@ -9,5 +9,5 @@ export class FindOneOrderDto extends PickType(Order, [
   'order_status',
   'totalAmount',
 ] as const) {
-  payment: GetPaymentDto;
+  payment: GetPaymentDto | null;
 }

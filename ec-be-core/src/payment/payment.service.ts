@@ -4,12 +4,14 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
-import { OrderStatus } from 'src/order/entities/order.entity';
+import { OrderStatus, Order } from 'src/order/entities/order.entity';
 import { OrderService } from 'src/order/order.service';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreatePaymentRequestDto,
   CreatePaymentResponseDto,
@@ -21,6 +23,8 @@ export class PaymentService {
   constructor(
     @Inject(forwardRef(() => OrderService))
     private readonly orderSvc: OrderService,
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
     private dataSource: DataSource,
     private configService: ConfigService,
   ) {}
@@ -30,10 +34,10 @@ export class PaymentService {
     dto: CreatePaymentRequestDto,
   ): Promise<CreatePaymentResponseDto> {
     const { order_id: orderId } = dto;
-    const order = await this.orderSvc.findOne(orderId);
 
+    const order = await this.orderRepository.findOne({ where: { id: orderId } });
     if (!order) {
-      throw new Error('Order not found');
+      throw new NotFoundException('Order not found');
     }
 
     const resp = await axios.post<CreatePaymentResponseDto>(
@@ -45,7 +49,11 @@ export class PaymentService {
   }
 
   async getPayment(orderId: string) {
-    return this.fetchPayment(orderId);
+    try {
+      return await this.fetchPayment(orderId);
+    } catch {
+      return null;
+    }
   }
 
   async syncPaymentStatus(orderId: string) {

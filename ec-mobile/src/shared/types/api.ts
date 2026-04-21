@@ -569,14 +569,14 @@ export interface components {
              * @description The payment method used.
              * @enum {string}
              */
-            payment_type: "card" | "bank_transfer" | "e_wallet";
+            payment_type: "card" | "bank_transfer" | "e_wallet" | "other";
             /** @description Hashed signature for verifying data integrity. */
             signature_key: string;
             /**
              * @description The final status of the transaction.
              * @enum {string}
              */
-            transaction_status: "pending" | "success" | "failed";
+            transaction_status: "capture" | "pending" | "success" | "failed" | "settlement" | "failure" | "cancel" | "deny" | "expire";
             /**
              * @description Result of the fraud detection analysis.
              * @enum {string}
@@ -607,6 +607,8 @@ export interface components {
              * @description The time the payment request would have expired.
              */
             expiry_time: string;
+            /** @description Redirect URL for completing the payment. */
+            payment_url?: string | null;
         };
         OrderDto: {
             id: string;
@@ -616,7 +618,7 @@ export interface components {
             orderDate: string;
             totalAmount: number;
             order_status: components["schemas"]["OrderStatus"];
-            payment: components["schemas"]["GetPaymentDto"][];
+            payment?: components["schemas"]["GetPaymentDto"][] | null;
         };
         FindAllOrderDto: {
             data: components["schemas"]["OrderDto"][];
@@ -626,7 +628,7 @@ export interface components {
             limit: number;
         };
         FindOneOrderDto: {
-            payment: components["schemas"]["GetPaymentDto"];
+            payment: components["schemas"]["GetPaymentDto"] | null;
             id: string;
             /** Format: date-time */
             orderDate: string;
@@ -1461,7 +1463,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["GetPaymentDto"];
+                    "application/json": Record<string, never>;
                 };
             };
         };

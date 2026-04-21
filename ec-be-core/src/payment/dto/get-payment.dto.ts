@@ -7,6 +7,7 @@ import {
   IsEnum,
   IsIn,
   IsDate,
+  IsOptional,
 } from 'class-validator';
 
 /**
@@ -133,4 +134,13 @@ export class GetPaymentDto {
   @Type(() => Date)
   @IsDate()
   expiry_time: Date;
+
+  @ApiProperty({
+    description: 'Redirect URL for completing the payment.',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  payment_url?: string | null;
 }
