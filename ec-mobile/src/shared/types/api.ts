@@ -1287,6 +1287,12 @@ export interface operations {
             query?: {
                 page?: number;
                 take?: number;
+                /** @description Filter by order status */
+                status?: "pending" | "pending_payment" | "payment_received" | "order_confirmed" | "failed" | "expired" | "awaiting_shipment" | "on_hold" | "awaiting_pickup" | "completed" | "cancelled";
+                /** @description Filter orders from this date (ISO 8601) */
+                dateFrom?: string;
+                /** @description Filter orders up to this date (ISO 8601) */
+                dateTo?: string;
             };
             header?: never;
             path?: never;

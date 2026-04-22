@@ -304,10 +304,11 @@ import { OpenapiQueryClient } from "openapi-react-query"
 
     if (endpoint.hasQueryPage) {
       content += `\n\nexport const ${hookName}Infinite = (
+        fetchOptions?: FetchOptions<operations['${endpoint.operationId}']>,
         options?: Parameters<typeof useInfiniteQuery<${typeName}>>[0]
       ) => {
        return useInfiniteQuery<${typeName}>({
-    queryKey: ['get', '${endpoint.path}'],
+    queryKey: ['get', '${endpoint.path}', fetchOptions?.params?.query],
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       if (lastPage.page < lastPage.totalPage) {
@@ -317,7 +318,8 @@ import { OpenapiQueryClient } from "openapi-react-query"
     queryFn: ({ pageParam = 1 }) => {
       return fetchClient
         .GET('${endpoint.path}', {
-          params: { query: { page: Number(pageParam) } },
+          ...fetchOptions,
+          params: { query: { page: Number(pageParam), ...fetchOptions?.params?.query } },
         })
         .then((res) => res.data as ${typeName})
         .catch((err) => {

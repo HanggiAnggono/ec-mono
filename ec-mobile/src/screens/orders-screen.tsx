@@ -1,17 +1,20 @@
 import Card from '@/components/card'
 import { Layout } from '@/layout/layout'
 import { formatCurrency } from '@/module/utils'
-import { useOrderFindAll } from '@/shared/query/order/use-order-find-all.query'
+import { useOrderFindAllInfinite } from '@/shared/query/order/use-order-find-all.query'
 import { OrderStatus } from '@/shared/types/api'
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   RefreshControl,
+  ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native'
 import { StackScreenProp } from '.'
+import { useState } from 'react'
 
 type OrderStatusKey = OrderStatus
 
@@ -43,34 +46,102 @@ const statusLabels: Record<OrderStatusKey, string> = {
   cancelled: 'Cancelled',
 }
 
+const filterOptions: { label: string; value?: OrderStatusKey }[] = [
+  { label: 'All' },
+  { label: 'Pending Payment', value: 'pending_payment' },
+  { label: 'Paid', value: 'payment_received' },
+  { label: 'Confirmed', value: 'order_confirmed' },
+  { label: 'Shipping', value: 'awaiting_shipment' },
+  { label: 'Completed', value: 'completed' },
+  { label: 'Cancelled', value: 'cancelled' },
+]
+
 export const OrdersScreen: React.FC<StackScreenProp<'Orders'>> = ({
   navigation,
 }) => {
-  const { data, isFetching, refetch, isError } = useOrderFindAll(
-    {},
-    { enabled: true },
+  const [activeFilter, setActiveFilter] = useState<OrderStatusKey | undefined>(
+    undefined,
   )
 
-  const orders = data?.data ?? []
+  const filters = activeFilter ? { status: activeFilter } : {}
+
+  const {
+    data,
+    isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+    isError,
+  } = useOrderFindAllInfinite(
+    { params: { query: filters } },
+  )
+
+  const allOrders = data?.pages.flatMap((page) => page.data ?? []) ?? []
+  const totalRecords = data?.pages[0]?.totalRecords ?? 0
 
   return (
     <Layout className="flex-1 bg-background">
+      {/* Header */}
+      <View className="px-4 pt-4 pb-2">
+        <Text className="text-3xl font-black text-[#e8eeff]">Orders</Text>
+        <Text className="text-sm text-[#c8d0e0] opacity-70 mt-1">
+          {totalRecords} order{totalRecords !== 1 ? 's' : ''}
+        </Text>
+      </View>
+
+      {/* Status filters */}
+      <View className="px-4 pb-3">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View className="flex-row gap-2">
+            {filterOptions.map((opt) => {
+              const isActive =
+                (!activeFilter && !opt.value) ||
+                activeFilter === opt.value
+              return (
+                <Pressable
+                  key={opt.value ?? 'all'}
+                  onPress={() =>
+                    setActiveFilter(opt.value ?? undefined)
+                  }
+                  className={`rounded-full px-4 py-1.5 ${
+                    isActive
+                      ? 'bg-primary'
+                      : 'bg-white/10'
+                  }`}
+                >
+                  <Text
+                    className={`text-xs font-semibold ${
+                      isActive ? 'text-white' : 'text-[#c8d0e0]'
+                    }`}
+                  >
+                    {opt.label}
+                  </Text>
+                </Pressable>
+              )
+            })}
+          </View>
+        </ScrollView>
+      </View>
+
+      {/* Order list */}
       <FlatList
-        data={orders}
+        data={allOrders}
         keyExtractor={(item) => item.id}
-        contentContainerClassName="px-4 pt-4 pb-32 gap-4"
+        contentContainerClassName="px-4 pt-2 pb-32 gap-4"
         refreshControl={
           <RefreshControl refreshing={isFetching} onRefresh={refetch} />
         }
-        ListHeaderComponent={
-          <View className="mb-2">
-            <Text className="text-3xl font-black text-[#e8eeff]">Orders</Text>
-            <Text className="text-sm text-[#c8d0e0] opacity-70 mt-1">
-              {data
-                ? `${data.totalRecords} order${data.totalRecords !== 1 ? 's' : ''}`
-                : 'Loading orders...'}
-            </Text>
-          </View>
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) fetchNextPage()
+        }}
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={
+          isFetchingNextPage ? (
+            <View className="py-4">
+              <ActivityIndicator size="small" />
+            </View>
+          ) : null
         }
         ListEmptyComponent={
           isFetching ? (
@@ -86,7 +157,9 @@ export const OrdersScreen: React.FC<StackScreenProp<'Orders'>> = ({
           ) : (
             <View className="flex items-center justify-center py-20">
               <Text className="text-[#c8d0e0] opacity-60">
-                No orders yet. Start shopping!
+                {activeFilter
+                  ? `No ${statusLabels[activeFilter] ?? ''} orders.`
+                  : 'No orders yet. Start shopping!'}
               </Text>
             </View>
           )
