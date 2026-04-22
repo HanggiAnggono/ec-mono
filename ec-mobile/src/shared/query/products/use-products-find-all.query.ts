@@ -19,10 +19,11 @@ export const useProductsFindAll = (
   }
 
 export const useProductsFindAllInfinite = (
+        fetchOptions?: FetchOptions<operations['ProductsController_findAll']>,
         options?: Parameters<typeof useInfiniteQuery<useProductsFindAllResponse>>[0]
       ) => {
        return useInfiniteQuery<useProductsFindAllResponse>({
-    queryKey: ['get', '/products'],
+    queryKey: ['get', '/products', fetchOptions?.params?.query],
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       if (lastPage.page < lastPage.totalPage) {
@@ -32,7 +33,8 @@ export const useProductsFindAllInfinite = (
     queryFn: ({ pageParam = 1 }) => {
       return fetchClient
         .GET('/products', {
-          params: { query: { page: Number(pageParam) } },
+          ...fetchOptions,
+          params: { query: { page: Number(pageParam), ...fetchOptions?.params?.query } },
         })
         .then((res) => res.data as useProductsFindAllResponse)
         .catch((err) => {

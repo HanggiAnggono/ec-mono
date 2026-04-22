@@ -5,8 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { Repository } from 'typeorm';
 import { FindOneOrderDto } from './dto/find-one-order.dto';
-import { PageParamDto } from 'src/pagination/dto/pagination-param.dto';
 import { FindAllOrderDto } from './dto/find-all-order.dto';
+import { FindAllOrdersQueryDto } from './dto/find-all-orders-query.dto';
 import { PaymentService } from 'src/payment/payment.service';
 import { GetPaymentDto } from 'src/payment/dto/get-payment.dto';
 
@@ -23,17 +23,43 @@ export class OrderService {
     return await this.orderRepository.save(newOrder);
   }
 
-  async findAll(pagination: PageParamDto): Promise<FindAllOrderDto> {
-    const query = this.orderRepository
+  async findAll(
+    query: FindAllOrdersQueryDto,
+    userId?: string,
+  ): Promise<FindAllOrderDto> {
+    const qb = this.orderRepository
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.orderItems', 'oi')
       .leftJoinAndSelect('oi.productVariant', 'pv')
       .leftJoinAndSelect('pv.product', 'prod')
       .orderBy('order.id', 'DESC');
-    query.take(pagination.take).skip(pagination.skip);
 
-    const [orders, total] = await query.getManyAndCount();
-    const pageCount = Math.ceil(total / pagination.take!);
+    if (userId) {
+      qb.andWhere('order.user = :userId', { userId });
+    }
+
+    if (query.status) {
+      qb.andWhere('order.order_status = :status', {
+        status: query.status,
+      });
+    }
+
+    if (query.dateFrom) {
+      qb.andWhere('order.orderDate >= :dateFrom', {
+        dateFrom: query.dateFrom,
+      });
+    }
+
+    if (query.dateTo) {
+      const to = new Date(query.dateTo);
+      to.setDate(to.getDate() + 1);
+      qb.andWhere('order.orderDate < :dateTo', { dateTo: to.toISOString() });
+    }
+
+    qb.take(query.take).skip(query.skip);
+
+    const [orders, total] = await qb.getManyAndCount();
+    const pageCount = Math.ceil(total / query.take!);
 
     const paymentPromises = orders.map(async (item) => {
       const payment = await this.paymentService.getPayment(item.id);
@@ -55,8 +81,8 @@ export class OrderService {
       data,
       totalPage: pageCount,
       totalRecords: total,
-      limit: pagination.take!,
-      page: pagination.page!,
+      limit: query.take!,
+      page: query.page!,
     };
     // return this.productRepository.find({ relations: ['category'] });
   }

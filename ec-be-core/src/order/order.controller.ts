@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Request,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -15,6 +16,7 @@ import { BaseAuthController } from 'src/auth/auth.controller';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { FindOneOrderDto } from './dto/find-one-order.dto';
 import { FindAllOrderDto } from './dto/find-all-order.dto';
+import { FindAllOrdersQueryDto } from './dto/find-all-orders-query.dto';
 import { PageParamDto } from 'src/pagination/dto/pagination-param.dto';
 
 @Controller('order')
@@ -30,8 +32,11 @@ export class OrderController extends BaseAuthController {
 
   @Get()
   @ApiOkResponse({ type: () => FindAllOrderDto })
-  async findAll(@Query() pagination: PageParamDto): Promise<FindAllOrderDto> {
-    return this.orderService.findAll(pagination);
+  async findAll(
+    @Query() query: FindAllOrdersQueryDto,
+    @Request() req,
+  ): Promise<FindAllOrderDto> {
+    return this.orderService.findAll(query, req.user.userId);
   }
 
   @Get(':id')
