@@ -164,7 +164,7 @@ export interface paths {
         patch: operations["UserController_update"];
         trace?: never;
     };
-    "/user/address": {
+    "/user/addresses": {
         parameters: {
             query?: never;
             header?: never;
@@ -173,27 +173,43 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["UserController_saveAddress"];
+        post: operations["UserController_createAddress"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/user/address/{userId}": {
+    "/user/addresses/{userId}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["UserController_getAddress"];
+        get: operations["UserController_getAddresses"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/user/addresses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["UserController_deleteAddress"];
+        options?: never;
+        head?: never;
+        patch: operations["UserController_updateAddress"];
         trace?: never;
     };
     "/auth/signup": {
@@ -549,7 +565,7 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
-            address: components["schemas"]["Address"];
+            addresses: components["schemas"]["Address"][];
             orders: components["schemas"]["Order"][];
         };
         Address: {
@@ -566,7 +582,7 @@ export interface components {
             updatedAt: string;
         };
         UpdateUserDto: Record<string, never>;
-        SaveAddressDto: {
+        CreateAddressDto: {
             userId: number;
             label: string;
             address: string;
@@ -586,6 +602,13 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+        };
+        UpdateAddressDto: {
+            label?: string;
+            address?: string;
+            description?: string;
+            latitude?: number;
+            longitude?: number;
         };
         SignupDto: {
             username: string;
@@ -808,8 +831,9 @@ export type Order = components['schemas']['Order'];
 export type User = components['schemas']['User'];
 export type Address = components['schemas']['Address'];
 export type UpdateUserDto = components['schemas']['UpdateUserDto'];
-export type SaveAddressDto = components['schemas']['SaveAddressDto'];
+export type CreateAddressDto = components['schemas']['CreateAddressDto'];
 export type AddressDto = components['schemas']['AddressDto'];
+export type UpdateAddressDto = components['schemas']['UpdateAddressDto'];
 export type SignupDto = components['schemas']['SignupDto'];
 export type SignupResponseDto = components['schemas']['SignupResponseDto'];
 export type LoginResponseDto = components['schemas']['LoginResponseDto'];
@@ -1271,7 +1295,7 @@ export interface operations {
             };
         };
     };
-    UserController_saveAddress: {
+    UserController_createAddress: {
         parameters: {
             query?: never;
             header?: never;
@@ -1280,7 +1304,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SaveAddressDto"];
+                "application/json": components["schemas"]["CreateAddressDto"];
             };
         };
         responses: {
@@ -1302,7 +1326,7 @@ export interface operations {
             };
         };
     };
-    UserController_getAddress: {
+    UserController_getAddresses: {
         parameters: {
             query?: never;
             header?: never;
@@ -1318,6 +1342,58 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    "application/json": components["schemas"]["AddressDto"][];
+                };
+            };
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Address"][];
+                };
+            };
+        };
+    };
+    UserController_deleteAddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UserController_updateAddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateAddressDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
                     "application/json": components["schemas"]["AddressDto"];
                 };
             };
@@ -1326,7 +1402,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["Address"];
                 };
             };
         };

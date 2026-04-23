@@ -3,25 +3,44 @@ import { Layout } from '@/layout/layout'
 import Icon from '@/components/icon'
 import { Button } from '@/components/button'
 import { Text, TextInput, TouchableOpacity, View, Alert } from 'react-native'
-import {
-  useGetAddresses,
-  useCreateAddress,
-  useUpdateAddress,
-} from '@/shared/query/user/use-address.mutation'
+import { useUserGetAddresses } from '@/shared/query/user/use-user-get-addresses.query'
+import { useUserCreateAddress } from '@/shared/query/user/use-user-create-address.mutation'
+import { useUserUpdateAddress } from '@/shared/query/user/use-user-update-address.mutation'
 import { useUserGetProfile } from '@/shared/query/user/use-user-get-profile.query'
 import { useState, useEffect } from 'react'
 import MapboxGL from '@rnmapbox/maps'
+import { useQueryClient } from '@tanstack/react-query'
 
 MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN)
 
 export const AddressEditScreen = ({ navigation, route }: any) => {
+  const queryClient = useQueryClient()
   const { addressId } = route.params || {}
   const isEdit = !!addressId
 
   const { data: profile } = useUserGetProfile()
-  const { data: addresses } = useGetAddresses(profile?.id)
-  const createAddress = useCreateAddress()
-  const updateAddress = useUpdateAddress()
+  const { data: addresses } = useUserGetAddresses(
+    { params: { path: { userId: String(profile?.id) } } },
+    { enabled: !!profile?.id },
+  )
+
+  const createAddress = useUserCreateAddress({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/user/addresses/{userId}'] })
+      navigation.goBack()
+    },
+    onError: (err: any) =>
+      Alert.alert('Error', err?.message || 'Failed to save address'),
+  })
+
+  const updateAddress = useUserUpdateAddress({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/user/addresses/{userId}'] })
+      navigation.goBack()
+    },
+    onError: (err: any) =>
+      Alert.alert('Error', err?.message || 'Failed to update address'),
+  })
 
   const existingAddress = addresses?.find((a) => a.id === addressId)
 
@@ -60,10 +79,12 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
   }
 
   const handleSubmit = () => {
-    if (!label.trim()) return Alert.alert('Validation', 'Label is required')
-    if (!address.trim()) return Alert.alert('Validation', 'Address is required')
+    if (!label.trim())
+      return Alert.alert('Validation', 'Label is required')
+    if (!address.trim())
+      return Alert.alert('Validation', 'Address is required')
 
-    const payload = {
+    const body = {
       label: label.trim(),
       address: address.trim(),
       description: description.trim() || undefined,
@@ -72,29 +93,21 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
     }
 
     if (isEdit) {
-      updateAddress.mutate(
-        { id: addressId, ...payload },
-        {
-          onSuccess: () => navigation.goBack(),
-          onError: (err: any) =>
-            Alert.alert('Error', err?.message || 'Failed to update address'),
-        },
-      )
+      updateAddress.mutate({
+        params: { path: { id: String(addressId) } },
+        body,
+      })
     } else {
-      createAddress.mutate(
-        { userId: profile!.id, ...payload },
-        {
-          onSuccess: () => navigation.goBack(),
-          onError: (err: any) =>
-            Alert.alert('Error', err?.message || 'Failed to save address'),
-        },
-      )
+      createAddress.mutate({
+        body: { userId: profile!.id, ...body },
+      })
     }
   }
 
-  const initialCoords = latitude && longitude
-    ? [longitude, latitude]
-    : [106.8456, -6.2088]
+  const initialCoords =
+    latitude && longitude
+      ? [longitude, latitude]
+      : [106.8456, -6.2088]
 
   const isSaving = createAddress.isPending || updateAddress.isPending
 
@@ -120,7 +133,10 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
           logoEnabled={false}
           attributionEnabled={false}
         >
-          <MapboxGL.Camera centerCoordinate={initialCoords} zoomLevel={14} />
+          <MapboxGL.Camera
+            centerCoordinate={initialCoords}
+            zoomLevel={14}
+          />
           <MapboxGL.PointAnnotation
             id="picker"
             coordinate={initialCoords}
@@ -160,7 +176,9 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
           </Text>
 
           <View className="gap-1.5">
-            <Text className="text-sm text-textSecondary font-semibold">Label *</Text>
+            <Text className="text-sm text-textSecondary font-semibold">
+              Label *
+            </Text>
             <TextInput
               value={label}
               onChangeText={setLabel}
@@ -171,7 +189,9 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
           </View>
 
           <View className="gap-1.5">
-            <Text className="text-sm text-textSecondary font-semibold">Address *</Text>
+            <Text className="text-sm text-textSecondary font-semibold">
+              Address *
+            </Text>
             <TextInput
               value={address}
               onChangeText={setAddress}
