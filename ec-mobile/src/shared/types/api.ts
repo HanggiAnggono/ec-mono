@@ -164,6 +164,38 @@ export interface paths {
         patch: operations["UserController_update"];
         trace?: never;
     };
+    "/user/address": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["UserController_saveAddress"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/address/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["UserController_getAddress"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/signup": {
         parameters: {
             query?: never;
@@ -476,20 +508,6 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        User: {
-            id: number;
-            username: string;
-            firstname: string;
-            lastname: string;
-            email: string;
-            phone: string;
-            password: string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            orders: components["schemas"]["Order"][];
-        };
         OrderItem: {
             id: number;
             order: components["schemas"]["Order"];
@@ -508,7 +526,56 @@ export interface components {
             /** @enum {string} */
             order_status: "pending" | "pending_payment" | "payment_received" | "order_confirmed" | "failed" | "expired" | "awaiting_shipment" | "on_hold" | "awaiting_pickup" | "completed" | "cancelled";
         };
+        User: {
+            id: number;
+            username: string;
+            firstname: string;
+            lastname: string;
+            email: string;
+            phone: string;
+            password: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            address: components["schemas"]["Address"];
+            orders: components["schemas"]["Order"][];
+        };
+        Address: {
+            id: number;
+            label: string;
+            address: string;
+            description: string;
+            latitude: number;
+            longitude: number;
+            user: components["schemas"]["User"];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         UpdateUserDto: Record<string, never>;
+        SaveAddressDto: {
+            userId: number;
+            label: string;
+            address: string;
+            description?: string;
+            latitude?: number;
+            longitude?: number;
+        };
+        AddressDto: {
+            id: number;
+            label: string;
+            address: string;
+            description?: string;
+            latitude?: number;
+            longitude?: number;
+            userId: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         SignupDto: {
             username: string;
             firstname: string;
@@ -723,10 +790,13 @@ export type CreateProductCategoryDto = components['schemas']['CreateProductCateg
 export type UpdateProductCategoryDto = components['schemas']['UpdateProductCategoryDto'];
 export type CreateUserDto = components['schemas']['CreateUserDto'];
 export type GetProfileDto = components['schemas']['GetProfileDto'];
-export type User = components['schemas']['User'];
 export type OrderItem = components['schemas']['OrderItem'];
 export type Order = components['schemas']['Order'];
+export type User = components['schemas']['User'];
+export type Address = components['schemas']['Address'];
 export type UpdateUserDto = components['schemas']['UpdateUserDto'];
+export type SaveAddressDto = components['schemas']['SaveAddressDto'];
+export type AddressDto = components['schemas']['AddressDto'];
 export type SignupDto = components['schemas']['SignupDto'];
 export type SignupResponseDto = components['schemas']['SignupResponseDto'];
 export type LoginResponseDto = components['schemas']['LoginResponseDto'];
@@ -1185,6 +1255,66 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    UserController_saveAddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveAddressDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AddressDto"];
+                };
+            };
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Address"];
+                };
+            };
+        };
+    };
+    UserController_getAddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AddressDto"];
+                };
+            };
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
             };
         };
     };

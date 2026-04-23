@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native'
 import { Routes } from '@/screens'
-import { useGetAddress } from '@/shared/query/user/use-address.mutation'
+import { useUserGetAddress } from '@/shared/query/user/use-user-get-address.query'
 import { useUserGetProfile } from '@/shared/query/user/use-user-get-profile.query'
 
 export const AddressListScreen = ({ navigation }: any) => {
@@ -17,7 +17,10 @@ export const AddressListScreen = ({ navigation }: any) => {
   const { data: profile } = useUserGetProfile(undefined, {
     enabled: !!token,
   })
-  const { data: address, isLoading } = useGetAddress(profile?.id)
+  const { data: address, isLoading } = useUserGetAddress(
+    { params: { path: { userId: String(profile?.id) } } },
+    { enabled: !!profile?.id },
+  )
 
   return (
     <Layout className="flex-1 bg-background p-4">
