@@ -38,7 +38,15 @@
         "projectId": "f2e636e7-633d-48ac-a2ff-78c92cc668d3"
       }
     },
-    "sdkVersion": "53.0.0"
+    "sdkVersion": "53.0.0",
+    "plugins": [
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsImpl": "mapbox"
+        }
+      ]
+    ]
   },
   "name": "ec-mobile"
 }

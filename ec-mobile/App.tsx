@@ -24,6 +24,8 @@ import { CheckoutScreen } from '@/screens/checkout-screen'
 import { PaymentScreen } from '@/screens/payment-screen'
 import { OrderDetailScreen } from '@/screens/order-detail-screen'
 import { OrdersScreen } from '@/screens/orders-screen'
+import { AddressListScreen } from '@/screens/address-list-screen'
+import { AddressEditScreen } from '@/screens/address-edit-screen'
 import { MainTabBar } from '@/components/main-tab-bar'
 import { useThemes } from '@/shared/hooks/use-themes'
 import { useColorScheme } from 'nativewind'
@@ -224,6 +226,16 @@ export default function App() {
                 name={Routes.OrderDetail}
                 options={{ title: 'Order Detail' }}
                 component={OrderDetailScreen}
+              />
+              <Stack.Screen
+                name={Routes.AddressList}
+                options={{ title: 'Address' }}
+                component={AddressListScreen}
+              />
+              <Stack.Screen
+                name={Routes.AddressEdit}
+                options={{ title: 'Edit Address' }}
+                component={AddressEditScreen}
               />
             </>
           ) : null}

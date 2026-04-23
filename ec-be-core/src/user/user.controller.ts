@@ -14,6 +14,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { BaseAuthController } from 'src/auth/auth.controller';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { GetProfileDto } from './dto/get-profile.dto';
+import { SaveAddressDto } from './dto/save-address.dto';
+import { AddressDto } from './dto/address.dto';
 
 @Controller('user')
 export class UserController extends BaseAuthController {
@@ -51,5 +53,17 @@ export class UserController extends BaseAuthController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
+  }
+
+  @Post('address')
+  @ApiOkResponse({ type: AddressDto })
+  saveAddress(@Body() saveAddressDto: SaveAddressDto) {
+    return this.userService.saveAddress(saveAddressDto);
+  }
+
+  @Get('address/:userId')
+  @ApiOkResponse({ type: AddressDto })
+  getAddress(@Param('userId') userId: string) {
+    return this.userService.getAddress(+userId);
   }
 }
