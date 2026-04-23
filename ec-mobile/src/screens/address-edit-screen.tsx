@@ -3,27 +3,38 @@ import { Layout } from '@/layout/layout'
 import Icon from '@/components/icon'
 import { Button } from '@/components/button'
 import { Text, TextInput, TouchableOpacity, View, Alert } from 'react-native'
-import { useGetAddress, useSaveAddress } from '@/shared/query/user/use-address.mutation'
+import { useUserGetAddress } from '@/shared/query/user/use-user-get-address.query'
+import { useUserSaveAddress } from '@/shared/query/user/use-user-save-address.mutation'
 import { useUserGetProfile } from '@/shared/query/user/use-user-get-profile.query'
 import { useState, useEffect, useRef } from 'react'
 import MapboxGL from '@rnmapbox/maps'
+import { useQueryClient } from '@tanstack/react-query'
 
 MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN)
 
 export const AddressEditScreen = ({ navigation }: any) => {
+  const queryClient = useQueryClient()
   const { data: profile } = useUserGetProfile()
-  const { data: existingAddress } = useGetAddress(profile?.id)
-  const saveAddress = useSaveAddress()
+  const { data: existingAddress } = useUserGetAddress(
+    { params: { path: { userId: String(profile?.id) } } },
+    { enabled: !!profile?.id },
+  )
+  const saveAddress = useUserSaveAddress({
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/user/address/{userId}'] })
+      navigation.goBack()
+    },
+    onError: (err: any) => {
+      Alert.alert('Error', err?.message || 'Failed to save address')
+    },
+  })
 
   const [label, setLabel] = useState('')
   const [address, setAddress] = useState('')
   const [description, setDescription] = useState('')
   const [latitude, setLatitude] = useState<number | undefined>()
   const [longitude, setLongitude] = useState<number | undefined>()
-  const [reverseGeocodeResult, setReverseGeocodeResult] = useState('')
   const [loadingGeocode, setLoadingGeocode] = useState(false)
-
-  const cameraRef = useRef<MapboxGL.Camera>(null)
 
   useEffect(() => {
     if (existingAddress) {
@@ -32,9 +43,6 @@ export const AddressEditScreen = ({ navigation }: any) => {
       setDescription(existingAddress.description || '')
       setLatitude(existingAddress.latitude)
       setLongitude(existingAddress.longitude)
-      if (existingAddress.address) {
-        setReverseGeocodeResult(existingAddress.address)
-      }
     }
   }, [existingAddress])
 
@@ -48,7 +56,6 @@ export const AddressEditScreen = ({ navigation }: any) => {
       const json = await res.json()
       const place = json.features?.[0]
       if (place) {
-        setReverseGeocodeResult(place.place_name)
         setAddress(place.place_name)
       }
     } catch (e) {
@@ -59,9 +66,7 @@ export const AddressEditScreen = ({ navigation }: any) => {
   }
 
   const handleMapPress = (feature: any) => {
-    const coords = feature.geometry.coordinates
-    const lng = coords[0]
-    const lat = coords[1]
+    const [lng, lat] = feature.geometry.coordinates
     setLatitude(lat)
     setLongitude(lng)
     reverseGeocode(lat, lng)
@@ -77,8 +82,8 @@ export const AddressEditScreen = ({ navigation }: any) => {
       return
     }
 
-    saveAddress.mutate(
-      {
+    saveAddress.mutate({
+      body: {
         userId: profile!.id,
         label: label.trim(),
         address: address.trim(),
@@ -86,20 +91,12 @@ export const AddressEditScreen = ({ navigation }: any) => {
         latitude,
         longitude,
       },
-      {
-        onSuccess: () => {
-          navigation.goBack()
-        },
-        onError: (err: any) => {
-          Alert.alert('Error', err?.message || 'Failed to save address')
-        },
-      }
-    )
+    })
   }
 
   const initialCoords = latitude && longitude
     ? [longitude, latitude]
-    : [106.8456, -6.2088] // default: Jakarta
+    : [106.8456, -6.2088]
 
   return (
     <Layout className="flex-1 bg-background">
@@ -112,7 +109,6 @@ export const AddressEditScreen = ({ navigation }: any) => {
           attributionEnabled={false}
         >
           <MapboxGL.Camera
-            ref={cameraRef}
             centerCoordinate={initialCoords}
             zoomLevel={14}
           />

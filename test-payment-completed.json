@@ -1,0 +1,27 @@
+{
+  "id": "f2bdaccf-8e15-4c61-af51-5d3b8ddcf639",
+  "orderItems": [],
+  "orderDate": "2026-04-22T08:40:00.000Z",
+  "totalAmount": 50000,
+  "order_status": "payment_received",
+  "payment": {
+    "status_code": "200",
+    "transaction_id": "completed-456",
+    "gross_amount": 50000.0,
+    "currency": "IDR",
+    "order_id": "f2bdaccf-8e15-4c61-af51-5d3b8ddcf639",
+    "payment_type": "other",
+    "signature_key": "",
+    "transaction_status": "settlement",
+    "fraud_status": "accept",
+    "status_message": "Payment status returned from local record",
+    "merchant_id": "",
+    "transaction_type": "snap",
+    "issuer": "",
+    "acquirer": "",
+    "transaction_time": "2026-04-22T01:40:43.104755",
+    "settlement_time": "2026-04-22T01:42:37.266632",
+    "expiry_time": null,
+    "payment_url": "https://app.sandbox.midtrans.com/snap/v4/redirection/test"
+  }
+}
