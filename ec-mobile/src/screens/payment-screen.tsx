@@ -2,7 +2,7 @@ import { Button } from '@/components/button'
 import { Layout } from '@/layout/layout'
 import { formatCurrency } from '@/module/utils'
 import { useOrderFindOne } from '@/shared/query/order/use-order-find-one.query'
-import { usePaymentSyncPaymentStatus } from '@/shared/query/payment/use-payment-sync-payment-status.mutation'
+import { usePaymentSyncPayment } from '@/shared/query/payment/use-payment-sync-payment.query'
 import React, { useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
@@ -38,8 +38,11 @@ export const PaymentScreen: React.FC<StackScreenProp<'Payment'>> = ({
       enabled: !!orderId,
     }
   )
-  const { mutateAsync: syncPaymentStatus, isPending: isSyncing } =
-    usePaymentSyncPaymentStatus()
+  const { refetch: syncPayment, isFetching: isSyncing } =
+    usePaymentSyncPayment(
+      { params: { path: { orderId } } },
+      { enabled: !!orderId }
+    )
 
   const webView = useRef<WebView>(null)
 
@@ -57,7 +60,7 @@ export const PaymentScreen: React.FC<StackScreenProp<'Payment'>> = ({
   const handleSyncStatus = async () => {
     if (!orderId) return
 
-    await syncPaymentStatus(orderId)
+    await syncPayment()
     const refreshed = await refetch()
 
     if (
