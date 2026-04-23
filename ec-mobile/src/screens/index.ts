@@ -13,6 +13,8 @@ export type RootStackParamList = {
   Payment: { orderId?: string; transactionToken?: string; redirectUrl?: string }
   Orders: undefined
   OrderDetail: { orderId: string }
+  AddressList: undefined
+  AddressEdit: undefined
 }
 
 export type RouteName = keyof RootStackParamList

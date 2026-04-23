@@ -21,6 +21,7 @@ const buttonVariants = {
 interface Props extends PressableProps {
   icon?: ComponentProps<typeof Icon>['name']
   variant?: keyof typeof buttonVariants
+  loading?: boolean
 }
 
 export const Button = ({
@@ -29,6 +30,7 @@ export const Button = ({
   className,
   icon,
   disabled,
+  loading,
   variant: _variant = 'primary',
   ...props
 }: Props) => {
@@ -38,7 +40,7 @@ export const Button = ({
       {...props}
       onPress={onPress}
       className={className}
-      disabled={disabled}
+      disabled={disabled || loading}
     >
       {({ pressed }) => {
         return (
@@ -62,14 +64,18 @@ export const Button = ({
                 )}
               />
             )}
-            <Text
-              className={clsx(variant.text, 'text-xl', {
-                [variant.pressed.text]: pressed,
-                'text-gray-300': disabled,
-              })}
-            >
-              {children as ReactNode}
-            </Text>
+            {loading ? (
+              <Text className={clsx(variant.text, 'text-xl')}>Saving...</Text>
+            ) : (
+              <Text
+                className={clsx(variant.text, 'text-xl', {
+                  [variant.pressed.text]: pressed,
+                  'text-gray-300': disabled,
+                })}
+              >
+                {children as ReactNode}
+              </Text>
+            )}
           </View>
         )
       }}

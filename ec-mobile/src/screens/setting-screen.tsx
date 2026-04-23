@@ -77,13 +77,22 @@ export const SettingScreen = ({
         )}
       </View>
       {token ? (
-        <TouchableOpacity
-          onPress={handleLogout}
-          className="items-center flex-row justify-between bg-background p-4 border-t border-t-background-400"
-        >
-          <Text className="text-text">Logout</Text>
-          <Icon className="color-text" name="right" size={16} />
-        </TouchableOpacity>
+        <View>
+          <TouchableOpacity
+            onPress={() => navigation.navigate(Routes.AddressList)}
+            className="items-center flex-row justify-between bg-background p-4 border-t border-t-background-400"
+          >
+            <Text className="text-text">My Address</Text>
+            <Icon className="color-text" name="right" size={16} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleLogout}
+            className="items-center flex-row justify-between bg-background p-4 border-t border-t-background-400"
+          >
+            <Text className="text-text">Logout</Text>
+            <Icon className="color-text" name="right" size={16} />
+          </TouchableOpacity>
+        </View>
       ) : null}
     </Layout>
   )

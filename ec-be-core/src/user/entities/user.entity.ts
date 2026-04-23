@@ -1,9 +1,11 @@
+import { Address } from './address.entity';
 import { Order } from 'src/order/entities/order.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
@@ -39,6 +41,9 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => Address, (address) => address.user)
+  address: Address;
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
