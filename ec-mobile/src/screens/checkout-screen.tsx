@@ -3,7 +3,7 @@ import { useGetCart } from '@/module/cart/usecases/use-get-cart'
 import { useCartCheckoutCart } from '@/shared/query/cart/use-cart-checkout-cart.mutation'
 import { useCartCompleteCheckout } from '@/shared/query/cart/use-cart-complete-checkout.mutation'
 import { CartItem } from '@/shared/types/api'
-import { useGetAddresses } from '@/shared/query/user/use-address.mutation'
+import { useUserGetAddresses } from '@/shared/query/user/use-user-get-addresses.query'
 import { useUserGetProfile } from '@/shared/query/user/use-user-get-profile.query'
 import React, { useEffect, useState } from 'react'
 import {
@@ -69,7 +69,10 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
     isPending: isCompleting,
   } = useCartCompleteCheckout()
   const { data: profile } = useUserGetProfile()
-  const { data: addresses } = useGetAddresses(profile?.id)
+  const { data: addresses, isLoading: addressesLoading } = useUserGetAddresses(
+    { params: { path: { userId: String(profile?.id) } } },
+    { enabled: !!profile?.id },
+  )
   const [selectedAddressId, setSelectedAddressId] = useState<number | undefined>()
   const [payment, setPayment] = useState('')
 
