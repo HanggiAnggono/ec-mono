@@ -4,12 +4,13 @@ import Icon from '@/components/icon'
 import { useAuthStore } from '@/store/auth.store'
 import {
   ActivityIndicator,
+  Alert,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native'
 import { Routes } from '@/screens'
-import { useUserGetAddress } from '@/shared/query/user/use-user-get-address.query'
+import { useGetAddresses, useDeleteAddress } from '@/shared/query/user/use-address.mutation'
 import { useUserGetProfile } from '@/shared/query/user/use-user-get-profile.query'
 
 export const AddressListScreen = ({ navigation }: any) => {
@@ -17,22 +18,29 @@ export const AddressListScreen = ({ navigation }: any) => {
   const { data: profile } = useUserGetProfile(undefined, {
     enabled: !!token,
   })
-  const { data: address, isLoading } = useUserGetAddress(
-    { params: { path: { userId: String(profile?.id) } } },
-    { enabled: !!profile?.id },
-  )
+  const { data: addresses, isLoading } = useGetAddresses(profile?.id)
+  const deleteAddress = useDeleteAddress()
+
+  const handleDelete = (id: number, label: string) => {
+    Alert.alert('Delete Address', `Delete "${label}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => deleteAddress.mutate(id),
+      },
+    ])
+  }
 
   return (
     <Layout className="flex-1 bg-background p-4">
       <View className="flex-row justify-between items-center mb-6">
-        <Text className="text-3xl font-black text-text">My Address</Text>
+        <Text className="text-3xl font-black text-text">Addresses</Text>
         <TouchableOpacity
           onPress={() => navigation.navigate(Routes.AddressEdit)}
           className="bg-primary px-4 py-2 rounded-full"
         >
-          <Text className="text-white font-bold text-sm">
-            {address ? 'Edit' : '+ Add'}
-          </Text>
+          <Text className="text-white font-bold text-sm">+ Add New</Text>
         </TouchableOpacity>
       </View>
 
@@ -40,26 +48,54 @@ export const AddressListScreen = ({ navigation }: any) => {
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="large" color="#90abff" />
         </View>
-      ) : address ? (
-        <Card className="p-5 gap-3">
-          <View className="flex-row items-center gap-2">
-            <Text className="text-base font-bold text-text">{address.label}</Text>
-          </View>
-          {address.description ? (
-            <Text className="text-sm text-textSecondary">{address.description}</Text>
-          ) : null}
-          <Text className="text-sm text-textSecondary">{address.address}</Text>
-          {address.latitude && address.longitude ? (
-            <Text className="text-xs text-textSecondary opacity-60">
-              📍 {address.latitude.toFixed(4)}, {address.longitude.toFixed(4)}
-            </Text>
-          ) : null}
-        </Card>
+      ) : addresses?.length ? (
+        <View className="gap-4">
+          {addresses.map((addr) => (
+            <TouchableOpacity
+              key={addr.id}
+              onPress={() =>
+                navigation.navigate(Routes.AddressEdit, {
+                  addressId: addr.id,
+                })
+              }
+              activeOpacity={0.7}
+            >
+              <Card className="p-5 gap-2">
+                <View className="flex-row justify-between items-start">
+                  <View className="flex-1 gap-1">
+                    <Text className="text-base font-bold text-text">
+                      {addr.label}
+                    </Text>
+                    <Text className="text-sm text-textSecondary">
+                      {addr.address}
+                    </Text>
+                    {addr.description ? (
+                      <Text className="text-sm text-textSecondary opacity-70">
+                        {addr.description}
+                      </Text>
+                    ) : null}
+                    {addr.latitude && addr.longitude ? (
+                      <Text className="text-xs text-textSecondary opacity-50">
+                        📍 {addr.latitude.toFixed(4)}, {addr.longitude.toFixed(4)}
+                      </Text>
+                    ) : null}
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => handleDelete(addr.id, addr.label)}
+                    hitSlop={10}
+                  >
+                    <Icon name="delete" size={18} className="color-red-400" />
+                  </TouchableOpacity>
+                </View>
+              </Card>
+            </TouchableOpacity>
+          ))}
+        </View>
       ) : (
         <View className="flex-1 items-center justify-center gap-3">
           <Icon name="environment" size={48} className="color-textSecondary opacity-30" />
           <Text className="text-textSecondary text-center">
-            No address saved yet.{'\n'}Tap "Add" to set your delivery address.
+            No addresses saved yet.{'\n'}Tap "+ Add New" to get started.
           </Text>
         </View>
       )}

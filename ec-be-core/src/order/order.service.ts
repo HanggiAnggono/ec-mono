@@ -32,6 +32,7 @@ export class OrderService {
       .leftJoinAndSelect('order.orderItems', 'oi')
       .leftJoinAndSelect('oi.productVariant', 'pv')
       .leftJoinAndSelect('pv.product', 'prod')
+      .leftJoinAndSelect('order.orderAddress', 'oa')
       .orderBy('order.id', 'DESC');
 
     if (userId) {
@@ -90,7 +91,7 @@ export class OrderService {
   async findOne(id: string): Promise<FindOneOrderDto> {
     const order = await this.orderRepository.findOneOrFail({
       where: { id },
-      relations: ['orderItems', 'orderItems.productVariant.product'],
+      relations: ['orderItems', 'orderItems.productVariant.product', 'orderAddress'],
     });
 
     const payment = await this.paymentService.getPayment(id);

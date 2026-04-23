@@ -1,17 +1,16 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
-  ManyToOne,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { Order } from './order.entity';
 
-@Entity()
-export class Address {
-  @PrimaryGeneratedColumn()
-  id: number;
+@Entity('order_address')
+export class OrderAddress {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   label: string;
@@ -28,12 +27,7 @@ export class Address {
   @Column({ type: 'float', nullable: true })
   longitude: number;
 
-  @ManyToOne(() => User, (user) => user.addresses)
-  user: User;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @OneToOne(() => Order, (order) => order.orderAddress)
+  @JoinColumn()
+  order: Order;
 }
