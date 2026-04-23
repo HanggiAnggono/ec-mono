@@ -7,11 +7,9 @@ import { useUserGetAddresses } from '@/shared/query/user/use-user-get-addresses.
 import { useUserCreateAddress } from '@/shared/query/user/use-user-create-address.mutation'
 import { useUserUpdateAddress } from '@/shared/query/user/use-user-update-address.mutation'
 import { useUserGetProfile } from '@/shared/query/user/use-user-get-profile.query'
-import { useState, useEffect } from 'react'
-import MapboxGL from '@rnmapbox/maps'
+import { useState, useEffect, useRef } from 'react'
+import MapView, { Marker } from 'react-native-maps'
 import { useQueryClient } from '@tanstack/react-query'
-
-MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN)
 
 export const AddressEditScreen = ({ navigation, route }: any) => {
   const queryClient = useQueryClient()
@@ -47,35 +45,30 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
   const [label, setLabel] = useState('')
   const [address, setAddress] = useState('')
   const [description, setDescription] = useState('')
-  const [latitude, setLatitude] = useState<number | undefined>()
-  const [longitude, setLongitude] = useState<number | undefined>()
-  const [loadingGeocode, setLoadingGeocode] = useState(false)
+  const [latitude, setLatitude] = useState<number>(-6.2088)
+  const [longitude, setLongitude] = useState<number>(106.8456)
+  const mapRef = useRef<MapView>(null)
 
   useEffect(() => {
     if (existingAddress) {
       setLabel(existingAddress.label)
       setAddress(existingAddress.address)
       setDescription(existingAddress.description || '')
-      setLatitude(existingAddress.latitude)
-      setLongitude(existingAddress.longitude)
+      setLatitude(existingAddress.latitude ?? -6.2088)
+      setLongitude(existingAddress.longitude ?? 106.8456)
     }
   }, [existingAddress])
 
-  const reverseGeocode = async (lat: number, lng: number) => {
-    setLoadingGeocode(true)
-    try {
-      const token = process.env.EXPO_PUBLIC_MAPBOX_TOKEN
-      const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${token}`,
-      )
-      const json = await res.json()
-      const place = json.features?.[0]
-      if (place) setAddress(place.place_name)
-    } catch (e) {
-      console.error('Reverse geocode failed', e)
-    } finally {
-      setLoadingGeocode(false)
-    }
+  const handleMapPress = (e: any) => {
+    const { latitude: lat, longitude: lng } = e.nativeEvent.coordinate
+    setLatitude(lat)
+    setLongitude(lng)
+  }
+
+  const handleMarkerDragEnd = (e: any) => {
+    const { latitude: lat, longitude: lng } = e.nativeEvent.coordinate
+    setLatitude(lat)
+    setLongitude(lng)
   }
 
   const handleSubmit = () => {
@@ -104,11 +97,6 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
     }
   }
 
-  const initialCoords =
-    latitude && longitude
-      ? [longitude, latitude]
-      : [106.8456, -6.2088]
-
   const isSaving = createAddress.isPending || updateAddress.isPending
 
   return (
@@ -122,50 +110,30 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
           <Icon name="left" size={20} className="color-white" />
         </TouchableOpacity>
 
-        <MapboxGL.MapView
+        <MapView
+          ref={mapRef}
           style={{ flex: 1 }}
-          onPress={(feature) => {
-            const [lng, lat] = feature.geometry.coordinates
-            setLatitude(lat)
-            setLongitude(lng)
-            reverseGeocode(lat, lng)
+          initialRegion={{
+            latitude,
+            longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
           }}
-          logoEnabled={false}
-          attributionEnabled={false}
+          onPress={handleMapPress}
+          showsUserLocation
         >
-          <MapboxGL.Camera
-            centerCoordinate={initialCoords}
-            zoomLevel={14}
-          />
-          <MapboxGL.PointAnnotation
-            id="picker"
-            coordinate={initialCoords}
+          <Marker
+            coordinate={{ latitude, longitude }}
             draggable
-            onDragEnd={(feature) => {
-              const [lng, lat] = feature.geometry.coordinates
-              setLatitude(lat)
-              setLongitude(lng)
-              reverseGeocode(lat, lng)
-            }}
-          >
-            <View
-              style={{
-                height: 32,
-                width: 32,
-                borderRadius: 16,
-                backgroundColor: '#90abff',
-                borderWidth: 3,
-                borderColor: '#fff',
-              }}
-            />
-          </MapboxGL.PointAnnotation>
-        </MapboxGL.MapView>
+            onDragEnd={handleMarkerDragEnd}
+          />
+        </MapView>
 
-        {loadingGeocode && (
-          <View className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-2 rounded-full">
-            <Text className="text-white text-xs">Looking up address...</Text>
-          </View>
-        )}
+        <View className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-2 rounded-full">
+          <Text className="text-white text-xs">
+            Tap or drag the pin to set location
+          </Text>
+        </View>
       </View>
 
       {/* Form */}
@@ -195,7 +163,7 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
             <TextInput
               value={address}
               onChangeText={setAddress}
-              placeholder="Address (auto-filled from map)"
+              placeholder="Enter your full address"
               placeholderTextColor="#40485d"
               className="w-full bg-background rounded-xl px-4 py-3 text-text text-sm"
               multiline
