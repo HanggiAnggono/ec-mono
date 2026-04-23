@@ -3,6 +3,8 @@ import { useGetCart } from '@/module/cart/usecases/use-get-cart'
 import { useCartCheckoutCart } from '@/shared/query/cart/use-cart-checkout-cart.mutation'
 import { useCartCompleteCheckout } from '@/shared/query/cart/use-cart-complete-checkout.mutation'
 import { CartItem } from '@/shared/types/api'
+import { useGetAddresses } from '@/shared/query/user/use-address.mutation'
+import { useUserGetProfile } from '@/shared/query/user/use-user-get-profile.query'
 import React, { useEffect, useState } from 'react'
 import {
   FlatList,
@@ -12,8 +14,9 @@ import {
   ActivityIndicator,
   Switch,
   Alert,
+  TouchableOpacity,
 } from 'react-native'
-import { StackScreenProp } from '.'
+import { Routes, StackScreenProp } from '.'
 import { Layout } from '@/layout/layout'
 import clsx from 'clsx'
 import Icon from '@/components/icon'
@@ -65,7 +68,17 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
     data,
     isPending: isCompleting,
   } = useCartCompleteCheckout()
+  const { data: profile } = useUserGetProfile()
+  const { data: addresses } = useGetAddresses(profile?.id)
+  const [selectedAddressId, setSelectedAddressId] = useState<number | undefined>()
   const [payment, setPayment] = useState('')
+
+  // Auto-select if only one address
+  useEffect(() => {
+    if (addresses?.length === 1 && !selectedAddressId) {
+      setSelectedAddressId(addresses[0].id)
+    }
+  }, [addresses])
 
   useEffect(() => {
     if (cart?.sessionId) {
@@ -96,7 +109,7 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
     }
 
     complete({
-      body: { paymentMethod: payment },
+      body: { paymentMethod: payment, addressId: selectedAddressId },
     }).then((resp) => {
       navigation.navigate('Payment', {
         orderId: resp.orderId,
@@ -104,6 +117,10 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
         redirectUrl: resp.redirectUrl,
       })
     })
+  }
+
+  function handleAddAddress() {
+    navigation.navigate(Routes.AddressEdit, {})
   }
 
   function renderItem({ item }: { item: CartItem }) {
@@ -144,9 +161,53 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
             data={items}
             renderItem={renderItem}
             ListFooterComponent={() => {
+              const selectedAddr = addresses?.find(
+                (a) => a.id === selectedAddressId,
+              )
               return (
                 <View className="bg-background mt-2 py-4">
-                  <Text className="text-xl text-text mb-4 px-4">
+                  {/* Address Picker */}
+                  <Text className="text-xl text-text mb-3 px-4">
+                    Delivery Address
+                  </Text>
+                  {selectedAddr ? (
+                    <TouchableOpacity
+                      className="bg-surface/5 border border-primary/30 rounded-xl mx-4 p-4"
+                      onPress={() =>
+                        navigation.navigate(Routes.AddressList)
+                      }
+                    >
+                      <View className="flex-row justify-between items-start">
+                        <View className="flex-1">
+                          <Text className="font-bold text-text">
+                            {selectedAddr.label}
+                          </Text>
+                          <Text className="text-sm text-textSecondary">
+                            {selectedAddr.address}
+                          </Text>
+                        </View>
+                        <Icon name="right" size={16} className="color-textSecondary" />
+                      </View>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      className="mx-4 border border-dashed border-textSecondary/30 rounded-xl p-4 items-center"
+                      onPress={() =>
+                        addresses?.length
+                          ? navigation.navigate(Routes.AddressList)
+                          : handleAddAddress()
+                      }
+                    >
+                      <Text className="text-textSecondary">
+                        {addresses?.length
+                          ? 'Select a delivery address'
+                          : 'Add a delivery address'}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {/* Payment Method */}
+                  <Text className="text-xl text-text mb-4 px-4 mt-6">
                     Payment Method
                   </Text>
                   <FlatList

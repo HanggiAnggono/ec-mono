@@ -516,15 +516,26 @@ export interface components {
             quantity: number;
             price: number;
         };
+        OrderAddress: {
+            id: string;
+            label: string;
+            address: string;
+            description: string;
+            latitude: number;
+            longitude: number;
+            order: components["schemas"]["Order"];
+        };
         Order: {
             id: string;
             user: components["schemas"]["User"];
             orderItems: components["schemas"]["OrderItem"][];
+            orderAddress: components["schemas"]["OrderAddress"];
             /** Format: date-time */
             orderDate: string;
             totalAmount: number;
             /** @enum {string} */
             order_status: "pending" | "pending_payment" | "payment_received" | "order_confirmed" | "failed" | "expired" | "awaiting_shipment" | "on_hold" | "awaiting_pickup" | "completed" | "cancelled";
+            addressId: number;
         };
         User: {
             id: number;
@@ -763,6 +774,7 @@ export interface components {
         };
         CompleteCheckoutDto: {
             paymentMethod: string;
+            addressId?: number;
         };
         CompleteCheckoutResponseDto: {
             orderId: string;
@@ -791,6 +803,7 @@ export type UpdateProductCategoryDto = components['schemas']['UpdateProductCateg
 export type CreateUserDto = components['schemas']['CreateUserDto'];
 export type GetProfileDto = components['schemas']['GetProfileDto'];
 export type OrderItem = components['schemas']['OrderItem'];
+export type OrderAddress = components['schemas']['OrderAddress'];
 export type Order = components['schemas']['Order'];
 export type User = components['schemas']['User'];
 export type Address = components['schemas']['Address'];

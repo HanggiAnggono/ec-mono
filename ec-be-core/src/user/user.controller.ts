@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   Request,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -14,7 +16,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { BaseAuthController } from 'src/auth/auth.controller';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { GetProfileDto } from './dto/get-profile.dto';
-import { SaveAddressDto } from './dto/save-address.dto';
+import { CreateAddressDto } from './dto/create-address.dto';
+import { UpdateAddressDto } from './dto/update-address.dto';
 import { AddressDto } from './dto/address.dto';
 
 @Controller('user')
@@ -55,15 +58,29 @@ export class UserController extends BaseAuthController {
     return this.userService.remove(+id);
   }
 
-  @Post('address')
+  // ── Address CRUD ──
+
+  @Post('addresses')
   @ApiOkResponse({ type: AddressDto })
-  saveAddress(@Body() saveAddressDto: SaveAddressDto) {
-    return this.userService.saveAddress(saveAddressDto);
+  createAddress(@Body() dto: CreateAddressDto) {
+    return this.userService.createAddress(dto);
   }
 
-  @Get('address/:userId')
+  @Get('addresses/:userId')
+  @ApiOkResponse({ type: [AddressDto] })
+  getAddresses(@Param('userId') userId: string) {
+    return this.userService.getAddresses(+userId);
+  }
+
+  @Patch('addresses/:id')
   @ApiOkResponse({ type: AddressDto })
-  getAddress(@Param('userId') userId: string) {
-    return this.userService.getAddress(+userId);
+  updateAddress(@Param('id') id: string, @Body() dto: UpdateAddressDto) {
+    return this.userService.updateAddress(+id, dto);
+  }
+
+  @Delete('addresses/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteAddress(@Param('id') id: string) {
+    return this.userService.deleteAddress(+id);
   }
 }

@@ -42,8 +42,8 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => Address, (address) => address.user)
-  address: Address;
+  @OneToMany(() => Address, (address) => address.user)
+  addresses: Address[];
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];

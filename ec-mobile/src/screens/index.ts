@@ -14,7 +14,7 @@ export type RootStackParamList = {
   Orders: undefined
   OrderDetail: { orderId: string }
   AddressList: undefined
-  AddressEdit: undefined
+  AddressEdit: { addressId?: number }
 }
 
 export type RouteName = keyof RootStackParamList

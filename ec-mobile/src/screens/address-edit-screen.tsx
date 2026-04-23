@@ -3,31 +3,27 @@ import { Layout } from '@/layout/layout'
 import Icon from '@/components/icon'
 import { Button } from '@/components/button'
 import { Text, TextInput, TouchableOpacity, View, Alert } from 'react-native'
-import { useUserGetAddress } from '@/shared/query/user/use-user-get-address.query'
-import { useUserSaveAddress } from '@/shared/query/user/use-user-save-address.mutation'
+import {
+  useGetAddresses,
+  useCreateAddress,
+  useUpdateAddress,
+} from '@/shared/query/user/use-address.mutation'
 import { useUserGetProfile } from '@/shared/query/user/use-user-get-profile.query'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import MapboxGL from '@rnmapbox/maps'
-import { useQueryClient } from '@tanstack/react-query'
 
 MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_TOKEN)
 
-export const AddressEditScreen = ({ navigation }: any) => {
-  const queryClient = useQueryClient()
+export const AddressEditScreen = ({ navigation, route }: any) => {
+  const { addressId } = route.params || {}
+  const isEdit = !!addressId
+
   const { data: profile } = useUserGetProfile()
-  const { data: existingAddress } = useUserGetAddress(
-    { params: { path: { userId: String(profile?.id) } } },
-    { enabled: !!profile?.id },
-  )
-  const saveAddress = useUserSaveAddress({
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/user/address/{userId}'] })
-      navigation.goBack()
-    },
-    onError: (err: any) => {
-      Alert.alert('Error', err?.message || 'Failed to save address')
-    },
-  })
+  const { data: addresses } = useGetAddresses(profile?.id)
+  const createAddress = useCreateAddress()
+  const updateAddress = useUpdateAddress()
+
+  const existingAddress = addresses?.find((a) => a.id === addressId)
 
   const [label, setLabel] = useState('')
   const [address, setAddress] = useState('')
@@ -51,13 +47,11 @@ export const AddressEditScreen = ({ navigation }: any) => {
     try {
       const token = process.env.EXPO_PUBLIC_MAPBOX_TOKEN
       const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${token}`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${token}`,
       )
       const json = await res.json()
       const place = json.features?.[0]
-      if (place) {
-        setAddress(place.place_name)
-      }
+      if (place) setAddress(place.place_name)
     } catch (e) {
       console.error('Reverse geocode failed', e)
     } finally {
@@ -65,53 +59,68 @@ export const AddressEditScreen = ({ navigation }: any) => {
     }
   }
 
-  const handleMapPress = (feature: any) => {
-    const [lng, lat] = feature.geometry.coordinates
-    setLatitude(lat)
-    setLongitude(lng)
-    reverseGeocode(lat, lng)
-  }
-
   const handleSubmit = () => {
-    if (!label.trim()) {
-      Alert.alert('Validation', 'Label is required')
-      return
-    }
-    if (!address.trim()) {
-      Alert.alert('Validation', 'Address is required')
-      return
+    if (!label.trim()) return Alert.alert('Validation', 'Label is required')
+    if (!address.trim()) return Alert.alert('Validation', 'Address is required')
+
+    const payload = {
+      label: label.trim(),
+      address: address.trim(),
+      description: description.trim() || undefined,
+      latitude,
+      longitude,
     }
 
-    saveAddress.mutate({
-      body: {
-        userId: profile!.id,
-        label: label.trim(),
-        address: address.trim(),
-        description: description.trim() || undefined,
-        latitude,
-        longitude,
-      },
-    })
+    if (isEdit) {
+      updateAddress.mutate(
+        { id: addressId, ...payload },
+        {
+          onSuccess: () => navigation.goBack(),
+          onError: (err: any) =>
+            Alert.alert('Error', err?.message || 'Failed to update address'),
+        },
+      )
+    } else {
+      createAddress.mutate(
+        { userId: profile!.id, ...payload },
+        {
+          onSuccess: () => navigation.goBack(),
+          onError: (err: any) =>
+            Alert.alert('Error', err?.message || 'Failed to save address'),
+        },
+      )
+    }
   }
 
   const initialCoords = latitude && longitude
     ? [longitude, latitude]
     : [106.8456, -6.2088]
 
+  const isSaving = createAddress.isPending || updateAddress.isPending
+
   return (
     <Layout className="flex-1 bg-background">
       {/* Map */}
       <View className="flex-1 min-h-[300px]">
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-black/50 items-center justify-center"
+        >
+          <Icon name="left" size={20} className="color-white" />
+        </TouchableOpacity>
+
         <MapboxGL.MapView
           style={{ flex: 1 }}
-          onPress={handleMapPress}
+          onPress={(feature) => {
+            const [lng, lat] = feature.geometry.coordinates
+            setLatitude(lat)
+            setLongitude(lng)
+            reverseGeocode(lat, lng)
+          }}
           logoEnabled={false}
           attributionEnabled={false}
         >
-          <MapboxGL.Camera
-            centerCoordinate={initialCoords}
-            zoomLevel={14}
-          />
+          <MapboxGL.Camera centerCoordinate={initialCoords} zoomLevel={14} />
           <MapboxGL.PointAnnotation
             id="picker"
             coordinate={initialCoords}
@@ -144,17 +153,10 @@ export const AddressEditScreen = ({ navigation }: any) => {
       </View>
 
       {/* Form */}
-      <View className="p-4 gap-4">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-black/50 items-center justify-center"
-        >
-          <Icon name="left" size={20} className="color-white" />
-        </TouchableOpacity>
-
+      <View className="p-4">
         <Card className="p-4 gap-4">
           <Text className="text-lg font-bold text-text">
-            {existingAddress ? 'Edit Address' : 'Add Address'}
+            {isEdit ? 'Edit Address' : 'Add Address'}
           </Text>
 
           <View className="gap-1.5">
@@ -198,9 +200,9 @@ export const AddressEditScreen = ({ navigation }: any) => {
             variant="primary"
             onPress={handleSubmit}
             className="w-full mt-2"
-            loading={saveAddress.isPending}
+            loading={isSaving}
           >
-            Save Address
+            {isEdit ? 'Update Address' : 'Save Address'}
           </Button>
         </Card>
       </View>

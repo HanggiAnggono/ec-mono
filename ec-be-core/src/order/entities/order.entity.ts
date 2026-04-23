@@ -4,10 +4,12 @@ import {
   Entity,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   Relation,
 } from 'typeorm';
 import { OrderItem } from './order-item.entity';
+import { OrderAddress } from './order-address.entity';
 
 export enum OrderStatus {
   PENDING = 'pending',
@@ -34,6 +36,9 @@ export class Order {
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order, { cascade: true })
   orderItems: Relation<OrderItem[]>;
 
+  @OneToOne(() => OrderAddress, (orderAddress) => orderAddress.order, { cascade: true })
+  orderAddress: Relation<OrderAddress>;
+
   @Column({ type: 'timestamp' })
   orderDate: Date;
 
@@ -47,4 +52,7 @@ export class Order {
     default: OrderStatus.PENDING,
   })
   order_status: OrderStatus;
+
+  @Column({ nullable: true, type: 'int' })
+  addressId: number;
 }

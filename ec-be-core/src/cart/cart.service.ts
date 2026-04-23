@@ -23,7 +23,9 @@ import {
   CompleteCheckoutResponseDto,
 } from './dto/complete-checkout.dto';
 import { OrderItem } from 'src/order/entities/order-item.entity';
+import { OrderAddress } from 'src/order/entities/order-address.entity';
 import { User } from 'src/user/entities/user.entity';
+import { Address } from 'src/user/entities/address.entity';
 
 @Injectable()
 export class CartService {
@@ -38,6 +40,10 @@ export class CartService {
     private orderRepository: Repository<Order>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(OrderAddress)
+    private orderAddressRepository: Repository<OrderAddress>,
+    @InjectRepository(Address)
+    private addressRepository: Repository<Address>,
     // @InjectRepository(Payment)
     // private paymentRepository: Repository<Payment>,
     private paymentService: PaymentService,
@@ -308,9 +314,8 @@ export class CartService {
   async completeCheckout(
     sessionId: string,
     data: CompleteCheckoutDto,
-    // paymentProvider: string,
   ): Promise<CompleteCheckoutResponseDto> {
-    const { paymentMethod } = data;
+    const { paymentMethod, addressId } = data;
     const cart = await this.cartRepository.findOneOrFail({
       where: { sessionId, isActive: true },
       relations: ['items', 'items', 'items.productVariant'],
@@ -353,7 +358,26 @@ export class CartService {
         0,
       ),
       order_status: OrderStatus.PENDING_PAYMENT,
+      addressId: addressId ?? undefined,
     });
+
+    // snapshot address into order_address if addressId provided
+    if (addressId) {
+      const userAddress = await this.addressRepository.findOne({
+        where: { id: addressId },
+      });
+      if (userAddress) {
+        const orderAddress = this.orderAddressRepository.create({
+          label: userAddress.label,
+          address: userAddress.address,
+          description: userAddress.description,
+          latitude: userAddress.latitude,
+          longitude: userAddress.longitude,
+        });
+        order.orderAddress = orderAddress;
+      }
+    }
+
     await this.orderRepository.save(order);
 
     const payment = await this.paymentService.createInvoice({
