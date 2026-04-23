@@ -9,6 +9,7 @@ import { ProductCategory } from 'src/product_category/entities/product_category.
 import { ProductVariant } from './entities/product-variant.entity';
 import { PageParamDto } from 'src/pagination/dto/pagination-param.dto';
 import { FindAllProductDto } from './dto/find-all-product.dto';
+import { CacheService } from 'src/cache/cache.service';
 
 @Injectable()
 export class ProductsService {
@@ -19,7 +20,15 @@ export class ProductsService {
     private categoryRepository: Repository<ProductCategory>,
     @InjectRepository(ProductVariant)
     private productVariantRepository: Repository<ProductVariant>,
+    private cache: CacheService,
   ) {}
+
+  private readonly CACHE_PREFIX = 'products';
+  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+  private invalidateProducts() {
+    this.cache.deleteByPrefix(this.CACHE_PREFIX);
+  }
 
   async create(createProductDto: CreateProductDto) {
     const product = this.productRepository.create(createProductDto);
@@ -32,41 +41,52 @@ export class ProductsService {
       if (category) product.category = category;
     }
 
+    this.invalidateProducts();
     return this.productRepository.save(product);
   }
 
   async findAll(pagination: PageParamDto): Promise<FindAllProductDto> {
-    const query = this.productRepository.createQueryBuilder('product');
-    query
-      .leftJoinAndSelect('product.category', 'category')
-      .take(pagination.take)
-      .skip(pagination.skip);
+    const cacheKey = `${this.CACHE_PREFIX}:page:${pagination.page}:limit:${pagination.take}`;
 
-    const [items, total] = await query.getManyAndCount();
-    const pageCount = Math.ceil(total / pagination.take!);
+    return this.cache.query(cacheKey, async () => {
+      const query = this.productRepository.createQueryBuilder('product');
+      query
+        .leftJoinAndSelect('product.category', 'category')
+        .take(pagination.take)
+        .skip(pagination.skip);
 
-    return {
-      data: items,
-      totalPage: pageCount,
-      totalRecords: total,
-      limit: pagination.take!,
-      page: pagination.page!,
-    };
-    // return this.productRepository.find({ relations: ['category'] });
+      const [items, total] = await query.getManyAndCount();
+      const pageCount = Math.ceil(total / pagination.take!);
+
+      return {
+        data: items,
+        totalPage: pageCount,
+        totalRecords: total,
+        limit: pagination.take!,
+        page: pagination.page!,
+      };
+    }, this.CACHE_TTL);
   }
 
   findOne(id: number) {
-    return this.productRepository.findOne({
-      where: { id },
-      relations: ['category', 'variants'],
-    });
+    return this.cache.query(
+      `${this.CACHE_PREFIX}:${id}`,
+      () =>
+        this.productRepository.findOne({
+          where: { id },
+          relations: ['category', 'variants'],
+        }),
+      this.CACHE_TTL,
+    );
   }
 
   update(id: number, updateProductDto: UpdateProductDto) {
+    this.invalidateProducts();
     return this.productRepository.update(id, updateProductDto);
   }
 
   remove(id: number) {
+    this.invalidateProducts();
     return this.productRepository.delete(id);
   }
 
@@ -79,6 +99,7 @@ export class ProductsService {
       throw new Error('Product not found');
     }
 
+    this.invalidateProducts();
     return this.productRepository.save({
       ...product,
       variants,
@@ -99,6 +120,7 @@ export class ProductsService {
       payload,
     );
 
+    this.invalidateProducts();
     return this.productVariantRepository.save(updatedVariant);
   }
 }

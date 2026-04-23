@@ -13,6 +13,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PaymentModule } from './payment/payment.module';
 import configuration from './config/configuration';
 import { typeormConfig } from 'src/typeorm.config';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { typeormConfig } from 'src/typeorm.config';
     CartModule,
     AuthModule,
     PaymentModule,
+    CacheModule,
   ],
   controllers: [AppController],
   providers: [AppService],
