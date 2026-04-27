@@ -8,8 +8,12 @@ import { useUserCreateAddress } from '@/shared/query/user/use-user-create-addres
 import { useUserUpdateAddress } from '@/shared/query/user/use-user-update-address.mutation'
 import { useUserGetProfile } from '@/shared/query/user/use-user-get-profile.query'
 import { useState, useEffect, useRef } from 'react'
-import MapView, { Marker } from 'react-native-maps'
+import MapLibreGL from '@maplibre/maplibre-react-native'
 import { useQueryClient } from '@tanstack/react-query'
+
+MapLibreGL.setAccessToken(null)
+
+const DEFAULT_STYLE_URL = 'https://demotiles.maplibre.org/style.json'
 
 export const AddressEditScreen = ({ navigation, route }: any) => {
   const queryClient = useQueryClient()
@@ -19,7 +23,7 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
   const { data: profile } = useUserGetProfile()
   const { data: addresses } = useUserGetAddresses(
     { params: { path: { userId: String(profile?.id) } } },
-    { enabled: !!profile?.id },
+    { enabled: !!profile?.id }
   )
 
   const createAddress = useUserCreateAddress({
@@ -47,7 +51,8 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
   const [description, setDescription] = useState('')
   const [latitude, setLatitude] = useState<number>(-6.2088)
   const [longitude, setLongitude] = useState<number>(106.8456)
-  const mapRef = useRef<MapView>(null)
+  const cameraRef = useRef<MapLibreGL.Camera>(null)
+  const didInit = useRef(false)
 
   useEffect(() => {
     if (existingAddress) {
@@ -59,23 +64,37 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
     }
   }, [existingAddress])
 
+  useEffect(() => {
+    if (!didInit.current && cameraRef.current) {
+      cameraRef.current.setCamera({
+        centerCoordinate: [longitude, latitude],
+        zoomLevel: 14,
+      })
+      didInit.current = true
+    }
+  }, [cameraRef.current, latitude, longitude])
+
   const handleMapPress = (e: any) => {
-    const { latitude: lat, longitude: lng } = e.nativeEvent.coordinate
-    setLatitude(lat)
-    setLongitude(lng)
+    const { geometry } = e.properties
+    if (geometry?.coordinates) {
+      const [lng, lat] = geometry.coordinates
+      setLatitude(lat)
+      setLongitude(lng)
+    }
   }
 
   const handleMarkerDragEnd = (e: any) => {
-    const { latitude: lat, longitude: lng } = e.nativeEvent.coordinate
-    setLatitude(lat)
-    setLongitude(lng)
+    const { geometry } = e.properties
+    if (geometry?.coordinates) {
+      const [lng, lat] = geometry.coordinates
+      setLatitude(lat)
+      setLongitude(lng)
+    }
   }
 
   const handleSubmit = () => {
-    if (!label.trim())
-      return Alert.alert('Validation', 'Label is required')
-    if (!address.trim())
-      return Alert.alert('Validation', 'Address is required')
+    if (!label.trim()) return Alert.alert('Validation', 'Label is required')
+    if (!address.trim()) return Alert.alert('Validation', 'Address is required')
 
     const body = {
       label: label.trim(),
@@ -110,24 +129,33 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
           <Icon name="left" size={20} className="color-white" />
         </TouchableOpacity>
 
-        <MapView
-          ref={mapRef}
+        <MapLibreGL.MapView
           style={{ flex: 1 }}
-          initialRegion={{
-            latitude,
-            longitude,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-          }}
+          mapStyle={DEFAULT_STYLE_URL}
           onPress={handleMapPress}
-          showsUserLocation
         >
-          <Marker
-            coordinate={{ latitude, longitude }}
+          <MapLibreGL.Camera ref={cameraRef} zoomLevel={14} />
+          <MapLibreGL.MarkerView
+            coordinate={[longitude, latitude]}
             draggable
             onDragEnd={handleMarkerDragEnd}
-          />
-        </MapView>
+          >
+            <View
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: 15,
+                backgroundColor: '#ef4444',
+                borderWidth: 3,
+                borderColor: '#fff',
+                shadowColor: '#000',
+                shadowOpacity: 0.3,
+                shadowRadius: 4,
+                elevation: 6,
+              }}
+            />
+          </MapLibreGL.MarkerView>
+        </MapLibreGL.MapView>
 
         <View className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-2 rounded-full">
           <Text className="text-white text-xs">
