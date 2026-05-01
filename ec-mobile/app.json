@@ -39,12 +39,7 @@
       }
     },
     "sdkVersion": "53.0.0",
-    "plugins": [
-      [
-        "@maplibre/maplibre-react-native",
-        {}
-      ]
-    ]
+    "plugins": [["react-native-maps", {}]]
   },
   "name": "ec-mobile"
 }

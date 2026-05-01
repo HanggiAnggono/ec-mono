@@ -1,11 +1,11 @@
-import { Button } from '@/components/button'
-import { useGetCart } from '@/module/cart/usecases/use-get-cart'
-import { useCartCheckoutCart } from '@/shared/query/cart/use-cart-checkout-cart.mutation'
-import { useCartCompleteCheckout } from '@/shared/query/cart/use-cart-complete-checkout.mutation'
-import { CartItem } from '@/shared/types/api'
-import { useUserGetAddresses } from '@/shared/query/user/use-user-get-addresses.query'
-import { useUserGetProfile } from '@/shared/query/user/use-user-get-profile.query'
-import React, { useEffect, useState } from 'react'
+import { Button } from "@/components/button";
+import { useGetCart } from "@/module/cart/usecases/use-get-cart";
+import { useCartCheckoutCart } from "@/shared/query/cart/use-cart-checkout-cart.mutation";
+import { useCartCompleteCheckout } from "@/shared/query/cart/use-cart-complete-checkout.mutation";
+import { CartItem } from "@/shared/types/api";
+import { useUserGetAddresses } from "@/shared/query/user/use-user-get-addresses.query";
+import { useUserGetProfile } from "@/shared/query/user/use-user-get-profile.query";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Text,
@@ -15,115 +15,122 @@ import {
   Switch,
   Alert,
   TouchableOpacity,
-} from 'react-native'
-import { Routes, StackScreenProp } from '.'
-import { Layout } from '@/layout/layout'
-import clsx from 'clsx'
-import Icon from '@/components/icon'
-import { LinearGradient } from '@/components/gradient'
-import { useThemes } from '@/shared/hooks/use-themes'
+} from "react-native";
+import { Routes, StackScreenProp } from ".";
+import { Layout } from "@/layout/layout";
+import clsx from "clsx";
+import Icon from "@/components/icon";
+import { LinearGradient } from "@/components/gradient";
+import { useThemes } from "@/shared/hooks/use-themes";
 
 const withOpacity = (color: string, opacity: number) => {
-  if (color.startsWith('#')) {
-    let hex = color.slice(1)
+  if (color.startsWith("#")) {
+    let hex = color.slice(1);
 
     if (hex.length === 3) {
       hex = hex
-        .split('')
+        .split("")
         .map((char) => char + char)
-        .join('')
+        .join("");
     }
 
     if (hex.length === 6) {
-      const r = parseInt(hex.slice(0, 2), 16)
-      const g = parseInt(hex.slice(2, 4), 16)
-      const b = parseInt(hex.slice(4, 6), 16)
+      const r = parseInt(hex.slice(0, 2), 16);
+      const g = parseInt(hex.slice(2, 4), 16);
+      const b = parseInt(hex.slice(4, 6), 16);
 
-      return `rgba(${r}, ${g}, ${b}, ${opacity})`
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
     }
   }
 
-  const rgbMatch = color.match(/rgba?\(([^)]+)\)/)
+  const rgbMatch = color.match(/rgba?\(([^)]+)\)/);
 
   if (rgbMatch) {
-    const [r, g, b] = rgbMatch[1].split(',').map((value) => value.trim())
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`
+    const [r, g, b] = rgbMatch[1].split(",").map((value) => value.trim());
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
   }
 
-  return color
-}
+  return color;
+};
 
-export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
+export const CheckoutScreen: React.FC<StackScreenProp<"Checkout">> = ({
   navigation,
 }) => {
-  const { primary } = useThemes()
-  const { data: cart } = useGetCart()
+  const { primary } = useThemes();
+  const { data: cart } = useGetCart();
   const {
     mutateAsync: checkout,
     data: checkoutData,
     isPending,
-  } = useCartCheckoutCart()
+  } = useCartCheckoutCart();
   const {
     mutateAsync: complete,
     data,
     isPending: isCompleting,
-  } = useCartCompleteCheckout()
-  const { data: profile } = useUserGetProfile()
+  } = useCartCompleteCheckout();
+  const { data: profile } = useUserGetProfile();
   const { data: addresses, isLoading: addressesLoading } = useUserGetAddresses(
     { params: { path: { userId: String(profile?.id) } } },
     { enabled: !!profile?.id },
-  )
-  const [selectedAddressId, setSelectedAddressId] = useState<number | undefined>()
-  const [payment, setPayment] = useState('')
+  );
+  const [selectedAddressId, setSelectedAddressId] = useState<
+    number | undefined
+  >();
+  const [payment, setPayment] = useState("");
 
   // Auto-select if only one address
   useEffect(() => {
     if (addresses?.length === 1 && !selectedAddressId) {
-      setSelectedAddressId(addresses[0].id)
+      setSelectedAddressId(addresses[0].id);
     }
-  }, [addresses])
+  }, [addresses]);
 
   useEffect(() => {
     if (cart?.sessionId) {
-      checkout({})
+      checkout({});
     }
-  }, [cart?.sessionId])
+  }, [cart?.sessionId]);
 
-  const items = checkoutData?.items || []
-  const payments = checkoutData?.paymentMethods || []
+  const items = checkoutData?.items || [];
+  const payments = checkoutData?.paymentMethods || [];
   const paymentMethodLabels = {
-    direct_transfer: 'Direct Transfer',
-    debit_credit: 'Debit/Credit Card',
-    ecpoint: 'EC Point',
-  }
-  const primaryColor = primary.toString()
+    direct_transfer: "Direct Transfer",
+    debit_credit: "Debit/Credit Card",
+    ecpoint: "EC Point",
+  };
+  const primaryColor = primary.toString();
   const selectedPaymentGradient = [
     withOpacity(primaryColor, 1),
     withOpacity(primaryColor, 0.77),
     withOpacity(primaryColor, 0.52),
     withOpacity(primaryColor, 0),
-  ] as const
+  ] as const;
 
   function handlePurchase() {
-    if (!cart) return
+    if (!cart) return;
     if (!payment) {
-      Alert.alert('Payment method required', 'Please select a payment method.')
-      return
+      Alert.alert("Payment method required", "Please select a payment method.");
+      return;
     }
 
     complete({
       body: { paymentMethod: payment, addressId: selectedAddressId },
     }).then((resp) => {
-      navigation.navigate('Payment', {
+      navigation.navigate("Payment", {
         orderId: resp.orderId,
         transactionToken: resp.transactionToken,
         redirectUrl: resp.redirectUrl,
-      })
-    })
+      });
+    });
   }
 
   function handleAddAddress() {
-    navigation.navigate(Routes.AddressEdit, {})
+    navigation.navigate(Routes.AddressEdit, {});
+  }
+
+  function handleSelectAddress(addressId: number) {
+    setSelectedAddressId(addressId);
+    navigation.replace(Routes.Checkout);
   }
 
   function renderItem({ item }: { item: CartItem }) {
@@ -149,7 +156,7 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
           </View>
         </View>
       </View>
-    )
+    );
   }
 
   return (
@@ -166,48 +173,52 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
             ListFooterComponent={() => {
               const selectedAddr = addresses?.find(
                 (a) => a.id === selectedAddressId,
-              )
+              );
               return (
                 <View className="bg-background mt-2 py-4">
                   {/* Address Picker */}
                   <Text className="text-xl text-text mb-3 px-4">
                     Delivery Address
                   </Text>
-                  {selectedAddr ? (
-                    <TouchableOpacity
-                      className="bg-surface/5 border border-primary/30 rounded-xl mx-4 p-4"
-                      onPress={() =>
-                        navigation.navigate(Routes.AddressList)
-                      }
-                    >
-                      <View className="flex-row justify-between items-start">
+                  <TouchableOpacity
+                    className={clsx(
+                      "mx-4 rounded-xl p-4",
+                      selectedAddr
+                        ? "bg-surface/5 border border-primary/30 flex-row justify-between items-center"
+                        : "border border-dashed border-text-secondary/30 items-center",
+                    )}
+                    onPress={() =>
+                      addresses?.length
+                        ? navigation.navigate(Routes.AddressList, {
+                            onSelect: handleSelectAddress,
+                          })
+                        : handleAddAddress()
+                    }
+                  >
+                    {selectedAddr ? (
+                      <>
                         <View className="flex-1">
                           <Text className="font-bold text-text">
                             {selectedAddr.label}
                           </Text>
-                          <Text className="text-sm text-textSecondary">
+                          <Text className="text-sm text-text-secondary">
                             {selectedAddr.address}
                           </Text>
                         </View>
-                        <Icon name="right" size={16} className="color-textSecondary" />
-                      </View>
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity
-                      className="mx-4 border border-dashed border-textSecondary/30 rounded-xl p-4 items-center"
-                      onPress={() =>
-                        addresses?.length
-                          ? navigation.navigate(Routes.AddressList)
-                          : handleAddAddress()
-                      }
-                    >
-                      <Text className="text-textSecondary">
+                        <Icon
+                          name="right"
+                          size={16}
+                          className="color-textSecondary"
+                        />
+                      </>
+                    ) : (
+                      <Text className="text-text-secondary">
                         {addresses?.length
-                          ? 'Select a delivery address'
-                          : 'Add a delivery address'}
+                          ? "Select a delivery address"
+                          : "Add a delivery address"}
                       </Text>
-                    </TouchableOpacity>
-                  )}
+                    )}
+                  </TouchableOpacity>
 
                   {/* Payment Method */}
                   <Text className="text-xl text-text mb-4 px-4 mt-6">
@@ -219,7 +230,7 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
                       <View className="border-[0.5px] border-background-200 opacity-20" />
                     )}
                     renderItem={({ item: method, separators }) => {
-                      const selected = method == payment
+                      const selected = method == payment;
                       return (
                         <View
                           key={method}
@@ -228,8 +239,8 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
                         >
                           <Text
                             className={clsx(
-                              selected ? 'text-surface' : 'text-text',
-                              'z-20'
+                              selected ? "text-surface" : "text-text",
+                              "z-20",
                             )}
                           >
                             {paymentMethodLabels[method]}
@@ -241,7 +252,7 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
                               end={{ x: 1, y: 0 }}
                               locations={[0, 0.4, 0.6, 1]}
                               style={{
-                                position: 'absolute',
+                                position: "absolute",
                                 top: 0,
                                 left: 0,
                                 right: 0,
@@ -257,11 +268,11 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
                             />
                           ) : null}
                         </View>
-                      )
+                      );
                     }}
                   />
                 </View>
-              )
+              );
             }}
           ></FlatList>
           <View className="absolute w-full bottom-0 bg-background p-safe-or-5">
@@ -277,5 +288,5 @@ export const CheckoutScreen: React.FC<StackScreenProp<'Checkout'>> = ({
         </>
       )}
     </Layout>
-  )
-}
+  );
+};
