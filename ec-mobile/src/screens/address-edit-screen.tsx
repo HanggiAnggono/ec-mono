@@ -34,9 +34,7 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
 
   const createAddress = useUserCreateAddress({
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [`/user/addresses/${profile?.id}`],
-      });
+      queryClient.invalidateQueries({ queryKey: ["/user/addresses/{userId}"] });
       navigation.goBack();
     },
     onError: (err: any) =>
@@ -45,9 +43,7 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
 
   const updateAddress = useUserUpdateAddress({
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [`/user/addresses/${profile?.id}`],
-      });
+      queryClient.invalidateQueries({ queryKey: ["/user/addresses/{userId}"] });
       navigation.goBack();
     },
     onError: (err: any) =>
