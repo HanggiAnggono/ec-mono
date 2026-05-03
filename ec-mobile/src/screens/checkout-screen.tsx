@@ -116,11 +116,11 @@ export const CheckoutScreen: React.FC<StackScreenProp<"Checkout">> = ({
     complete({
       body: { paymentMethod: payment, addressId: selectedAddressId },
     }).then((resp) => {
-      navigation.navigate("Payment", {
+      navigation.replace(Routes.Payment, {
         orderId: resp.orderId,
         transactionToken: resp.transactionToken,
         redirectUrl: resp.redirectUrl,
-      });
+      })
     });
   }
 

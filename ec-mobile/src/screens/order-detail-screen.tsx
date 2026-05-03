@@ -47,6 +47,7 @@ export const OrderDetailScreen: React.FC<StackScreenProp<'OrderDetail'>> = ({
   route,
 }) => {
   const orderId = route.params.orderId
+  console.log('[LOG] | OrderDetailScreen | orderId:', orderId)
   const { data: order, isFetching } = useOrderFindOne(
     { params: { path: { id: orderId } } },
     { enabled: !!orderId }
