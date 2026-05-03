@@ -1,0 +1,17 @@
+// Project-local debug tasks
+//
+// For more documentation on how to configure debug tasks,
+// see: https://zed.dev/docs/debugger
+[
+  {
+    "adapter": "Debugpy",
+    "cwd": "${ZED_WORKTREE_ROOT}/ec-payment",
+    "request": "attach",
+    "pathMappings": [
+      {
+        "localRoot": "${ZED_WORKTREE_ROOT}/ec-payment/src",
+        "remoteRoot": "/app/src",
+      },
+    ],
+  },
+]
