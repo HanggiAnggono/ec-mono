@@ -15,6 +15,7 @@ class PaymentType(str, Enum):
     CREDIT_CARD = "credit_card"
     BANK_TRANSFER = "bank_transfer"
     SHOPEEPAY = "shopeepay"
+    ECHANNEL = "echannel"
     OTHER = "other"
 
 
@@ -84,9 +85,9 @@ class PaymentStatusResponseDTO(BaseModel):
     fraud_status: Literal["accept", "deny", "challenge"] = Field(..., description="Result of the fraud detection analysis.")
     status_message: str = Field(..., description="A human-readable message about the status.")
     merchant_id: str = Field(..., description="The unique identifier for the merchant.")
-    transaction_type: str = Field(..., description="Type of transaction processing.")
-    issuer: str = Field(..., description="The party that issued the payment instrument.")
-    acquirer: str = Field(..., description="The payment processor that acquired the transaction.")
+    transaction_type: Optional[str] = Field(None, description="Type of transaction processing.")
+    issuer: Optional[str] = Field(None, description="The party that issued the payment instrument.")
+    acquirer: Optional[str] = Field(None, description="The payment processor that acquired the transaction.")
 
     # Dates are parsed automatically into datetime objects if format is correct
     transaction_time: datetime = Field(..., description="The time the transaction was initiated.")
