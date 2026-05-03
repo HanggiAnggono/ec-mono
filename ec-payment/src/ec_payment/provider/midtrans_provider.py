@@ -5,7 +5,7 @@ import os
 import logging
 
 from ec_payment.core.interfaces import PaymentProvider
-from ec_payment.model.payment import PaymentMethod, PaymentStatus
+from ec_payment.model.payment import PaymentStatus
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -139,24 +139,6 @@ class MidtransProvider(PaymentProvider):
 
         return PaymentStatus.PENDING
 
-    def get_payment_method(self, payment_type: str) -> PaymentMethod:
-        match payment_type:
-            case "gopay" | "shopeepay" | "ovo" | "dana" | "linkaja":
-                return PaymentMethod.EWALLET
-            case "credit_card":
-                return PaymentMethod.CREDIT_CARD
-            case "debit_card":
-                return PaymentMethod.DEBIT_CARD
-            case "paypal":
-                return PaymentMethod.PAYPAL
-            case "qris" | "bca_klikpay":
-                return PaymentMethod.EWALLET
-            case "echannel" | "cstore" | "bca_va" | "mandiri_va" | "bri_va" | "bni_va" | "permata_va":
-                return PaymentMethod.BANK_TRANSFER
-            case _:
-                logger.warning(f"Unknown payment type: {payment_type}, treating as bank transfer")
-
-        return PaymentMethod.BANK_TRANSFER
 
 class Customer:
     """Customer data class for Midtrans transactions"""

@@ -98,7 +98,7 @@ class PaymentService:
 
     def handle_webhook(self, request: PaymentWebhookRequestDTO, db: Session):
         status = self.payment_provider.get_status_name(request.transaction_status)
-        method = self.payment_provider.get_payment_method(request.payment_type)
+        method = request.payment_type
         payment = db.exec(
             select(Payment).where(
                 (Payment.order_id == request.order_id)
@@ -215,7 +215,7 @@ class PaymentService:
 
         payment_type = status.get("payment_type")
         if payment_type:
-            payment.method = self.payment_provider.get_payment_method(payment_type)
+            payment.method = payment_type
 
         payment.updated_at = datetime.now()
         payment.meta = json.dumps(status)
