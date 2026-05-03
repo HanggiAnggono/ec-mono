@@ -47,7 +47,6 @@ export const OrderDetailScreen: React.FC<StackScreenProp<'OrderDetail'>> = ({
   route,
 }) => {
   const orderId = route.params.orderId
-  console.log('[LOG] | OrderDetailScreen | orderId:', orderId)
   const { data: order, isFetching } = useOrderFindOne(
     { params: { path: { id: orderId } } },
     { enabled: !!orderId }
@@ -70,8 +69,6 @@ export const OrderDetailScreen: React.FC<StackScreenProp<'OrderDetail'>> = ({
   }
 
   const statusKey = (order.order_status ?? 'pending') as OrderStatusKey
-  const needsPayment =
-    order.order_status === 'pending_payment' || order.order_status === 'pending'
 
   return (
     <Layout className="flex-1 bg-background">
@@ -156,26 +153,24 @@ export const OrderDetailScreen: React.FC<StackScreenProp<'OrderDetail'>> = ({
             </Card>
 
             {/* Go to Payment */}
-            {needsPayment ? (
-              <TouchableOpacity
-                className="rounded-full py-4 px-6 items-center"
-                style={{
-                  backgroundColor: '#90abff',
-                  experimental_backgroundImage: 'linear-gradient(135deg, #90abff, #316bf3)',
-                }}
-                onPress={() =>
-                  navigation.navigate(Routes.Payment, {
-                    orderId: order.id,
-                    transactionToken: order.payment?.transaction_id,
-                  })
-                }
-                activeOpacity={0.7}
-              >
-                <Text className="text-[#060e20] font-bold text-base tracking-wide">
-                  Go to Payment
-                </Text>
-              </TouchableOpacity>
-            ) : null}
+            <TouchableOpacity
+              className="rounded-full py-4 px-6 items-center"
+              style={{
+                backgroundColor: '#90abff',
+                experimental_backgroundImage: 'linear-gradient(135deg, #90abff, #316bf3)',
+              }}
+              onPress={() =>
+                navigation.navigate(Routes.Payment, {
+                  orderId: order.id,
+                  transactionToken: order.payment?.transaction_id,
+                })
+              }
+              activeOpacity={0.7}
+            >
+              <Text className="text-[#060e20] font-bold text-base tracking-wide">
+                Go to Payment
+              </Text>
+            </TouchableOpacity>
           </View>
         }
       />

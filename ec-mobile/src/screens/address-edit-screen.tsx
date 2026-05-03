@@ -1,7 +1,7 @@
-import Card from "@/components/card";
-import { Layout } from "@/layout/layout";
-import Icon from "@/components/icon";
-import { Button } from "@/components/button";
+import Card from '@/components/card'
+import { Layout } from '@/layout/layout'
+import Icon from '@/components/icon'
+import { Button } from '@/components/button'
 import { Text, TouchableOpacity, View, Alert, Platform } from 'react-native'
 import { useUserGetAddresses } from '@/shared/query/user/use-user-get-addresses.query'
 import { useUserCreateAddress } from '@/shared/query/user/use-user-create-address.mutation'
@@ -11,11 +11,15 @@ import { useState, useEffect, useRef } from 'react'
 import MapView, { Marker } from 'react-native-maps'
 import { useQueryClient } from '@tanstack/react-query'
 import { TextInput } from '@/components/form/textinput'
+import { Routes, StackScreenProp } from '.'
 
 const DEFAULT_LAT = -6.2088
 const DEFAULT_LNG = 106.8456
 
-export const AddressEditScreen = ({ navigation, route }: any) => {
+export const AddressEditScreen = ({
+  navigation,
+  route,
+}: StackScreenProp<typeof Routes.AddressEdit>) => {
   const queryClient = useQueryClient()
   const { addressId } = route.params || {}
   const isEdit = !!addressId
@@ -33,7 +37,7 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
           queryKey: ['/user/addresses/{userId}'],
         })
       }, 500)
-      navigation.goBack()
+      navigation.popTo(Routes.AddressList, {})
     },
     onError: (err: any) =>
       Alert.alert('Error', err?.message || 'Failed to save address'),
@@ -46,7 +50,7 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
           queryKey: ['/user/addresses/{userId}'],
         })
       }, 500)
-      navigation.goBack()
+      navigation.popTo(Routes.AddressList, {})
     },
     onError: (err: any) =>
       Alert.alert('Error', err?.message || 'Failed to update address'),
@@ -108,7 +112,7 @@ export const AddressEditScreen = ({ navigation, route }: any) => {
       {/* Map */}
       <View className="flex-1 min-h-[300px]">
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
+          onPress={() => navigation.popTo(Routes.AddressList, {})}
           className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-black/50 items-center justify-center"
         >
           <Icon name="left" size={20} className="color-white" />
