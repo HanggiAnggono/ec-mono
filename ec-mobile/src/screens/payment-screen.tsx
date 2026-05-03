@@ -38,11 +38,10 @@ export const PaymentScreen: React.FC<StackScreenProp<'Payment'>> = ({
       enabled: !!orderId,
     }
   )
-  const { refetch: syncPayment, isFetching: isSyncing } =
-    usePaymentSyncPayment(
-      { params: { path: { orderId } } },
-      { enabled: !!orderId }
-    )
+  const { refetch: syncPayment, isFetching: isSyncing } = usePaymentSyncPayment(
+    { params: { path: { orderId } } },
+    { enabled: false }
+  )
 
   const webView = useRef<WebView>(null)
 
@@ -88,7 +87,7 @@ export const PaymentScreen: React.FC<StackScreenProp<'Payment'>> = ({
           </View>
         ) : (
           <ScrollView>
-            <View className="px-4 py-4 border-b border-background-200 bg-background gap-2">
+            <View className="px-4 py-4 border-b border-background-200 bg-background rounded-md m-2 gap-2">
               <Text className="text-2xl font-bold text-text">
                 Complete Payment
               </Text>
@@ -125,7 +124,7 @@ export const PaymentScreen: React.FC<StackScreenProp<'Payment'>> = ({
                 source={{ uri: paymentUrl }}
                 className="flex-1 h-10"
                 nestedScrollEnabled
-                style={{ height: 600 }}
+                style={{ height: 600, minHeight: 600 }}
                 allowsBackForwardNavigationGestures={true}
                 cacheEnabled={false}
                 javaScriptEnabled
@@ -161,7 +160,7 @@ export const PaymentScreen: React.FC<StackScreenProp<'Payment'>> = ({
                 }}
               />
             ) : (
-              <View className="flex-1 items-center justify-center px-6">
+              <View className="flex-1 items-center justify-center px-6 min-h-[10rem] bg-background m-2 rounded-md">
                 <Text className="text-center text-text">
                   {hasTerminalStatus
                     ? 'Payment is already finalized.'
@@ -172,7 +171,7 @@ export const PaymentScreen: React.FC<StackScreenProp<'Payment'>> = ({
 
             {/* Order Items */}
             {orderDetails?.orderItems?.length > 0 ? (
-              <View className="px-4 py-3 border-b border-background-200 bg-background gap-2">
+              <View className="px-4 py-3 border-b border-background-200 bg-background m-2 rounded-md gap-2">
                 <Text className="text-sm font-semibold text-text opacity-80">
                   Items
                 </Text>
@@ -212,7 +211,7 @@ export const PaymentScreen: React.FC<StackScreenProp<'Payment'>> = ({
               </View>
             ) : null}
 
-            <View className="px-4 py-4 border-t border-background-200 bg-background gap-3">
+            <View className="px-4 py-4 border-t border-background-200 bg-background m-2 rounded-md gap-3">
               <View className="flex-row flex-wrap gap-3">
                 <Button
                   onPress={() => handleSyncStatus().catch(console.error)}
