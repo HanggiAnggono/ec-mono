@@ -1,7 +1,7 @@
-from datetime import datetime
-from decimal import Decimal
 import json
 import logging
+from datetime import datetime
+from decimal import Decimal
 
 from fastapi import HTTPException
 from midtransclient.error_midtrans import MidtransAPIError
@@ -135,7 +135,9 @@ class PaymentService:
         self, order_id: str, db: Session, refresh: bool = False
     ) -> PaymentStatusResponseDTO:
         payment = db.exec(
-            select(Payment).where(Payment.order_id == order_id).order_by(desc(Payment.created_at))
+            select(Payment)
+            .where(Payment.order_id == order_id)
+            .order_by(desc(Payment.created_at))
         ).first()
 
         if payment is None:
@@ -149,20 +151,26 @@ class PaymentService:
                 reference_id=payment.transaction_id or payment.order_id
             )
             self._apply_remote_status(payment, status)
+            status['payment_url'] = payment.payment_url
             db.add(payment)
             db.commit()
             db.refresh(payment)
-            return PaymentStatusResponseDTO.model_validate(status)
+            res = PaymentStatusResponseDTO.model_validate(status)
+            return res
         except MidtransAPIError as e:
             if "404" in str(e):
                 return self._build_local_status_response(payment)
             raise HTTPException(
                 status_code=502, detail="Failed to fetch payment status from Midtrans"
             )
-        except Exception:
-            raise HTTPException(status_code=500, detail="Failed to fetch payment status")
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Failed to fetch payment status: {str(e)}"
+            )
 
-    def _build_local_status_response(self, payment: Payment) -> PaymentStatusResponseDTO:
+    def _build_local_status_response(
+        self, payment: Payment
+    ) -> PaymentStatusResponseDTO:
         return PaymentStatusResponseDTO(
             status_code="200",
             transaction_id=payment.transaction_id or payment.id,
