@@ -16,7 +16,7 @@ import { FindAllProductDto } from './dto/find-all-product.dto';
 import { FindOneProductDto } from './dto/find-one-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsService } from './products.service';
-import { PageParamDto } from 'src/pagination/dto/pagination-param.dto';
+import { FindAllProductParam } from './dto/find-all-product-param.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -29,8 +29,10 @@ export class ProductsController {
 
   @Get()
   @ApiOkResponse({ type: () => FindAllProductDto })
-  async findAll(@Query() pagination: PageParamDto): Promise<FindAllProductDto> {
-    return await this.productsService.findAll(pagination);
+  async findAll(
+    @Query() param: FindAllProductParam,
+  ): Promise<FindAllProductDto> {
+    return await this.productsService.findAll(param);
   }
 
   @Get(':id')

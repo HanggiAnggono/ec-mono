@@ -882,6 +882,7 @@ export interface operations {
             query?: {
                 page?: number;
                 take?: number;
+                name?: string;
             };
             header?: never;
             path?: never;

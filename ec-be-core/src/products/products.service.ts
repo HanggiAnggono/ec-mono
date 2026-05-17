@@ -4,12 +4,12 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateVariantDto } from './dto/create-variant.dto';
 import { Product } from './entities/product.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { ProductCategory } from 'src/product_category/entities/product_category.entity';
 import { ProductVariant } from './entities/product-variant.entity';
-import { PageParamDto } from 'src/pagination/dto/pagination-param.dto';
 import { FindAllProductDto } from './dto/find-all-product.dto';
 import { CacheService } from 'src/cache/cache.service';
+import { FindAllProductParam } from './dto/find-all-product-param.dto';
 
 @Injectable()
 export class ProductsService {
@@ -45,27 +45,39 @@ export class ProductsService {
     return this.productRepository.save(product);
   }
 
-  async findAll(pagination: PageParamDto): Promise<FindAllProductDto> {
-    const cacheKey = `${this.CACHE_PREFIX}:page:${pagination.page}:limit:${pagination.take}`;
+  async findAll(param: FindAllProductParam): Promise<FindAllProductDto> {
+    const cacheKey = `${this.CACHE_PREFIX}:page:${param.page}:limit:${param.take}:name:${param.name?.replace(' ', '')}`;
 
-    return this.cache.query(cacheKey, async () => {
-      const query = this.productRepository.createQueryBuilder('product');
-      query
-        .leftJoinAndSelect('product.category', 'category')
-        .take(pagination.take)
-        .skip(pagination.skip);
+    console.log({ cacheKey, param });
 
-      const [items, total] = await query.getManyAndCount();
-      const pageCount = Math.ceil(total / pagination.take!);
+    return this.cache.query(
+      cacheKey,
+      async () => {
+        const [items, total] = await this.productRepository.findAndCount({
+          relations: ['category'],
+          where: param.name
+            ? {
+                name: Like(`%${param.name}%`),
+              }
+            : undefined,
+          take: param.take,
+          skip: param.skip,
+        });
 
-      return {
-        data: items,
-        totalPage: pageCount,
-        totalRecords: total,
-        limit: pagination.take!,
-        page: pagination.page!,
-      };
-    }, this.CACHE_TTL);
+        console.log({ items });
+
+        const pageCount = Math.ceil(total / param.take!);
+
+        return {
+          data: items,
+          totalPage: pageCount,
+          totalRecords: total,
+          limit: param.take!,
+          page: param.page!,
+        };
+      },
+      this.CACHE_TTL,
+    );
   }
 
   findOne(id: number) {

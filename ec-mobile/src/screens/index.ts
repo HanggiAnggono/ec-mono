@@ -1,25 +1,26 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 
 export type RootStackParamList = {
-  Onboarding: undefined;
-  Login: undefined;
-  Signup: undefined;
-  HomeTab: undefined;
-  Home: undefined;
-  Setting: undefined;
-  ProductDetail: { id: string; variantId?: string };
-  Cart: undefined;
-  Checkout: undefined;
+  Onboarding: undefined
+  Login: undefined
+  Signup: undefined
+  HomeTab: undefined
+  Home: undefined
+  Setting: undefined
+  ProductDetail: { id: string; variantId?: string }
+  Cart: undefined
+  Checkout: undefined
   Payment: {
-    orderId?: string;
-    transactionToken?: string;
-    redirectUrl?: string;
-  };
-  Orders: undefined;
-  OrderDetail: { orderId: string };
-  AddressList: { onSelect?: (addressId: number) => void };
-  AddressEdit: { addressId?: number };
-};
+    orderId?: string
+    transactionToken?: string
+    redirectUrl?: string
+  }
+  Orders: undefined
+  OrderDetail: { orderId: string }
+  AddressList: { onSelect?: (addressId: number) => void }
+  AddressEdit: { addressId?: number }
+  Search: undefined
+}
 
 export type RouteName = keyof RootStackParamList;
 export type RouteParams = RootStackParamList;

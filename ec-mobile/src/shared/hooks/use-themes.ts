@@ -7,6 +7,7 @@ type ThemeGradient = readonly [ColorValue, ColorValue, ...ColorValue[]]
 type TailwindThemeColors = {
   primary: ColorValue
   background: ColorValue
+  canvas: ColorValue
   surface: ColorValue
   text: ColorValue
   textSecondary: ColorValue
@@ -16,6 +17,7 @@ type TailwindThemeColors = {
 const toTailwindColors = (palette: ThemeGradient): TailwindThemeColors => ({
   primary: palette[0],
   background: palette[1],
+  canvas: '#030712',
   surface: palette[2],
   text: palette[3],
   textSecondary: palette[3],

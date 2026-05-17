@@ -19,6 +19,8 @@ import {
   View,
 } from 'react-native'
 import { Button } from '@/components/button'
+import { TextInput as CustomTextInput } from '@/components/form/textinput'
+import { Routes } from '.'
 
 type TProduct = Product
 
@@ -247,6 +249,19 @@ const HomeFooter = ({
   </View>
 )
 
+const SearchBox = () => {
+  const { navigate } = useNavigation()
+  const handlePressSearch = () => {
+    navigate(Routes.Search)
+  }
+
+  return (
+    <View>
+      <CustomTextInput placeholder="Search..." onPress={handlePressSearch} />
+    </View>
+  )
+}
+
 // ─── HomeScreen ───────────────────────────────────────────────────────────────
 export const HomeScreen = () => {
   const {
@@ -318,11 +333,15 @@ export const HomeScreen = () => {
 
   return (
     <Layout>
+      <View className="absolute top-[6rem] z-10 p-4 w-full">
+        <SearchBox />
+      </View>
       <FlatList
         key={selectedCategory ?? 'all'}
         numColumns={2}
         data={filteredProducts}
         renderItem={renderItem}
+        className="pt-[6rem]"
         keyExtractor={(item) => String(item.id)}
         ListHeaderComponent={
           <>
