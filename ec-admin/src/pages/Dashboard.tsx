@@ -1,4 +1,7 @@
 import { Link } from 'react-router-dom'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { Badge } from '../components/ui/Badge'
 
 function Dashboard() {
   return (
@@ -9,39 +12,36 @@ function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white shadow rounded-lg p-6">
+        <Card>
           <h3 className="text-lg font-medium text-gray-900">Categories</h3>
           <p className="text-3xl font-bold text-indigo-600 mt-2">0</p>
-        </div>
+        </Card>
 
-        <div className="bg-white shadow rounded-lg p-6">
+        <Card>
           <h3 className="text-lg font-medium text-gray-900">Products</h3>
           <p className="text-3xl font-bold text-green-600 mt-2">0</p>
-        </div>
+        </Card>
 
-        <div className="bg-white shadow rounded-lg p-6">
+        <Card>
           <h3 className="text-lg font-medium text-gray-900">Orders</h3>
           <p className="text-3xl font-bold text-blue-600 mt-2">0</p>
-        </div>
+        </Card>
       </div>
 
-      <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+      <Card title="Quick Actions">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link
-            to="/categories"
-            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            Manage Categories
+          <Link to="/categories">
+            <Button variant="primary" className="w-full">
+              Manage Categories
+            </Button>
           </Link>
-          <Link
-            to="/"
-            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            Dashboard
+          <Link to="/">
+            <Button variant="secondary" className="w-full">
+              Dashboard
+            </Button>
           </Link>
         </div>
-      </div>
+      </Card>
     </div>
   )
 }
