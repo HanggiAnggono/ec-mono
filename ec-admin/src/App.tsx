@@ -1,12 +1,19 @@
-import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import AdminLayout from './layouts/AdminLayout'
+import Dashboard from './pages/Dashboard'
+import ProductCategoryPage from './pages/ProductCategoryPage'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div>
-      <h1 className="h-full">EC Admin</h1>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="categories" element={<ProductCategoryPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   )
 }
 
