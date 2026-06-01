@@ -1,18 +1,33 @@
-interface ProductCategory {
+export interface ProductCategory {
   id: number
   name: string
   description: string
-  imageUrl?: string | null
-  isActive?: boolean
-  createdAt?: string
-  updatedAt?: string
-  products?: any[]
+  products?: unknown[]
+}
+
+export interface Product {
+  id: number
+  name: string
+  description: string
+  category?: {
+    id: number
+    name: string
+    description: string
+  } | null
+}
+
+export interface PaginatedResponse<T> {
+  data: T[]
+  totalPage: number
+  totalRecords: number
+  limit: number
+  page: number
 }
 
 class ApiClient {
   private baseUrl: string
 
-  constructor(baseUrl: string = 'http://localhost:3000') {
+  constructor(baseUrl: string = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000') {
     this.baseUrl = baseUrl
   }
 
@@ -72,6 +87,22 @@ class ApiClient {
     return this.request(`/product-category/${id}`, {
       method: 'DELETE',
     })
+  }
+
+  async getProducts(params?: {
+    page?: number
+    take?: number
+    name?: string
+  }): Promise<PaginatedResponse<Product>> {
+    const searchParams = new URLSearchParams()
+    if (params?.page) searchParams.set('page', String(params.page))
+    if (params?.take) searchParams.set('take', String(params.take))
+    if (params?.name) searchParams.set('name', params.name)
+
+    const query = searchParams.toString()
+    return this.request<PaginatedResponse<Product>>(
+      `/products${query ? `?${query}` : ''}`
+    )
   }
 }
 

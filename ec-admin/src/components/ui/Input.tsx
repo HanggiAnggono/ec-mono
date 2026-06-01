@@ -7,7 +7,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   icon?: React.ReactNode
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, error, icon, id, type = 'text', ...props }, ref) => {
     const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`
 
@@ -16,14 +16,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="mb-2 block font-mono text-xs uppercase tracking-[0.2em] text-[#cfd8ff]"
           >
             {label}
           </label>
         )}
         <div className="relative">
           {icon && (
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
               {icon}
             </div>
           )}
@@ -32,16 +32,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             type={type}
             className={cn(
-              'block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500',
+              'block w-full rounded-[16px] border border-[var(--line)] bg-[#0d1427] px-4 py-3 text-slate-100 outline-none transition placeholder:text-[var(--muted)] focus:border-[#d3dbff] focus:shadow-[0_0_0_3px_rgba(188,202,255,0.14)]',
               icon && 'pl-10',
-              error && 'border-red-500 focus:border-red-500 focus:ring-red-500',
+              error && 'border-[#f2a5a9] shadow-[0_0_0_3px_rgba(242,165,169,0.12)]',
               className
             )}
             {...props}
           />
         </div>
         {error && (
-          <p className="mt-1 text-sm text-red-600">{error}</p>
+          <p className="mt-2 text-sm text-[#ffc4ca]">{error}</p>
         )}
       </div>
     )

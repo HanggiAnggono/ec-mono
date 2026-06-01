@@ -7,13 +7,13 @@ export interface BadgeProps {
   size?: 'sm' | 'md' | 'lg'
 }
 
-const Badge = ({ children, variant = 'default', size = 'md' }: BadgeProps) => {
+export const Badge = ({ children, variant = 'default', size = 'md' }: BadgeProps) => {
   const variants = {
-    default: 'bg-gray-100 text-gray-800',
-    success: 'bg-green-100 text-green-800',
-    warning: 'bg-yellow-100 text-yellow-800',
-    danger: 'bg-red-100 text-red-800',
-    info: 'bg-blue-100 text-blue-800',
+    default: 'border-white/10 bg-white/6 text-slate-200',
+    success: 'border-[#9ae0cf66] bg-[#9ae0cf14] text-[#c9ffef]',
+    warning: 'border-[#ffd38f66] bg-[#ffd38f14] text-[#ffe8bf]',
+    danger: 'border-[#f2a5a966] bg-[#f2a5a914] text-[#ffd4d7]',
+    info: 'border-[#bccaff66] bg-[#bccaff14] text-[#dce4ff]',
   }
 
   const sizes = {
@@ -25,7 +25,7 @@ const Badge = ({ children, variant = 'default', size = 'md' }: BadgeProps) => {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full font-medium',
+        'inline-flex items-center rounded-full border font-mono font-medium backdrop-blur-md',
         variants[variant],
         sizes[size]
       )}
