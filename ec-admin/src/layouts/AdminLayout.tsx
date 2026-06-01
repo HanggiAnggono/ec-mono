@@ -12,7 +12,12 @@ const navItems: NavItem[] = [
     label: 'Dashboard',
     to: '/',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
         <rect x="3" y="3" width="7" height="7" rx="1.5" />
         <rect x="14" y="3" width="7" height="11" rx="1.5" />
         <rect x="3" y="14" width="7" height="7" rx="1.5" />
@@ -24,7 +29,12 @@ const navItems: NavItem[] = [
     label: 'Categories',
     to: '/categories',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
         <path d="M4 7.5 12 3l8 4.5-8 4.5-8-4.5Z" />
         <path d="M4 12.5 12 17l8-4.5" />
         <path d="M4 17 12 21l8-4" />
@@ -33,8 +43,14 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Products',
+    to: '/products',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
         <path d="M4 7h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" />
         <path d="M9 7V5a3 3 0 0 1 6 0v2" />
         <path d="M4 11h16" />
@@ -44,7 +60,12 @@ const navItems: NavItem[] = [
   {
     label: 'Orders',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
         <circle cx="9" cy="19" r="1.5" />
         <circle cx="17" cy="19" r="1.5" />
         <path d="M3 4h2l2.7 10.4a1 1 0 0 0 1 .8h8.6a1 1 0 0 0 1-.8L20 7H7" />

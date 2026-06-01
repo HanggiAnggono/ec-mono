@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import AdminLayout from './layouts/AdminLayout'
 import Dashboard from './pages/Dashboard'
 import ProductCategoryPage from './pages/ProductCategoryPage'
+import ProductManagementPage from './pages/ProductManagementPage'
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <Route path="/" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="categories" element={<ProductCategoryPage />} />
+          <Route path="products" element={<ProductManagementPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
