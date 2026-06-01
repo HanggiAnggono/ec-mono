@@ -13,5 +13,12 @@
 
   body {
     letter-spacing: -0.01em;
+    color: #e0e0e0;
+    background-color: #121212;
   }
+}
+
+/* Ensure dark theme defaults */
+:root {
+  color-scheme: dark;
 }
