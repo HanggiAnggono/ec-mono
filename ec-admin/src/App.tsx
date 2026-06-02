@@ -3,6 +3,7 @@ import AdminLayout from './layouts/AdminLayout'
 import Dashboard from './pages/Dashboard'
 import ProductCategoryPage from './pages/ProductCategoryPage'
 import ProductManagementPage from './pages/ProductManagementPage'
+import VariantManagementPage from './pages/VariantManagementPage'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="categories" element={<ProductCategoryPage />} />
           <Route path="products" element={<ProductManagementPage />} />
+          <Route path="products/:productId/variants" element={<VariantManagementPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

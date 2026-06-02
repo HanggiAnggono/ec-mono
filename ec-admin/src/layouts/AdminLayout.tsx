@@ -130,9 +130,7 @@ function SidebarLink({ item }: { item: NavItem }) {
         ].join(' ')
       }
     >
-      <SvgIcon>
-        <span className="text-[#c9d2f9]">{item.icon}</span>
-      </SvgIcon>
+      <SvgIcon>{item.icon}</SvgIcon>
       <span className="font-mono text-[0.95rem]">{item.label}</span>
     </NavLink>
   )

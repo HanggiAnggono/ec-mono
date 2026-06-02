@@ -30,6 +30,10 @@ export class ProductsService {
     this.cache.deleteByPrefix(this.CACHE_PREFIX);
   }
 
+  private invalidateProduct(productId: number) {
+    this.cache.delete(`${this.CACHE_PREFIX}:${productId}`);
+  }
+
   async create(createProductDto: CreateProductDto) {
     const product = this.productRepository.create(createProductDto);
 
@@ -111,16 +115,23 @@ export class ProductsService {
       throw new Error('Product not found');
     }
 
+    const variantEntities = variants.map((variant) =>
+      this.productVariantRepository.create({
+        ...variant,
+        product,
+      }),
+    );
+
+    await this.productVariantRepository.save(variantEntities);
+    this.invalidateProduct(productId);
     this.invalidateProducts();
-    return this.productRepository.save({
-      ...product,
-      variants,
-    });
+    return this.findOne(productId);
   }
 
   async updateVariant(variantId: number, payload: CreateVariantDto) {
-    const variant = await this.productVariantRepository.findOneBy({
-      id: variantId,
+    const variant = await this.productVariantRepository.findOne({
+      where: { id: variantId },
+      relations: ['product'],
     });
 
     if (!variant) {
@@ -132,7 +143,27 @@ export class ProductsService {
       payload,
     );
 
+    if (variant.product?.id) {
+      this.invalidateProduct(variant.product.id);
+    }
     this.invalidateProducts();
     return this.productVariantRepository.save(updatedVariant);
+  }
+
+  async deleteVariant(variantId: number) {
+    const variant = await this.productVariantRepository.findOne({
+      where: { id: variantId },
+      relations: ['product'],
+    });
+
+    if (!variant) {
+      throw new Error('Variant not found');
+    }
+
+    if (variant.product?.id) {
+      this.invalidateProduct(variant.product.id);
+    }
+    this.invalidateProducts();
+    return this.productVariantRepository.delete(variantId);
   }
 }

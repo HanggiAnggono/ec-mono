@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Badge } from '../components/ui/Badge'
@@ -39,6 +40,7 @@ const defaultFormData = {
 }
 
 function ProductManagementPage() {
+  const navigate = useNavigate()
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -106,7 +108,7 @@ function ProductManagementPage() {
     setFormData({
       name: product.name,
       description: product.description || '',
-      categoryId: product.categoryId,
+      categoryId: product.categoryId ?? 0,
     })
     setIsModalOpen(true)
   }
@@ -188,12 +190,15 @@ function ProductManagementPage() {
       <section className="rounded-[30px] border border-[var(--line)] bg-[rgba(15,22,39,0.82)] px-6 py-7 shadow-[0_28px_72px_-44px_rgba(0,0,0,0.85)] backdrop-blur-2xl sm:px-8">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <p className="font-mono text-[12px] uppercase tracking-[0.32em] text-[#cfd8ff]">Inventory Control</p>
+            <p className="font-mono text-[12px] uppercase tracking-[0.32em] text-[#cfd8ff]">
+              Inventory Control
+            </p>
             <h2 className="mt-4 font-display text-4xl font-semibold tracking-[-0.06em] text-white sm:text-5xl">
               Product Management
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)]">
-              Manage your product catalog — add new items, update details, or remove listings.
+              Manage your product catalog — add new items, update details, or
+              remove listings.
             </p>
           </div>
 
@@ -203,7 +208,13 @@ function ProductManagementPage() {
             size="lg"
             className="min-w-[220px] justify-center xl:mt-2"
             icon={
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <path d="M12 5v14" />
                 <path d="M5 12h14" />
               </svg>
@@ -217,28 +228,40 @@ function ProductManagementPage() {
       {/* Stats Cards */}
       <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Card>
-          <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[#b7c2df]">Total Products</p>
+          <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[#b7c2df]">
+            Total Products
+          </p>
           <p className="mt-5 font-display text-5xl font-semibold tracking-[-0.05em] text-white">
             {isLoading ? '—' : totalRecords}
           </p>
-          <p className="mt-3 text-sm text-[var(--muted)]">All products currently in the catalog.</p>
+          <p className="mt-3 text-sm text-[var(--muted)]">
+            All products currently in the catalog.
+          </p>
         </Card>
         <Card>
-          <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[#b7c2df]">Filtered View</p>
+          <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[#b7c2df]">
+            Filtered View
+          </p>
           <p className="mt-5 font-display text-5xl font-semibold tracking-[-0.05em] text-white">
             {isLoading ? '—' : filteredProducts.length}
           </p>
-          <p className="mt-3 text-sm text-[var(--muted)]">Live result count based on the current search criteria.</p>
+          <p className="mt-3 text-sm text-[var(--muted)]">
+            Live result count based on the current search criteria.
+          </p>
         </Card>
         <Card>
-          <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[#b7c2df]">Sync Status</p>
+          <p className="font-mono text-[12px] uppercase tracking-[0.24em] text-[#b7c2df]">
+            Sync Status
+          </p>
           <div className="mt-5 flex items-center gap-3">
             <Badge variant={error ? 'danger' : 'success'} size="lg">
               {error ? 'Attention' : 'Synced'}
             </Badge>
           </div>
           <p className="mt-3 text-sm text-[var(--muted)]">
-            {error ? 'Backend action needs attention.' : 'Product service is ready for edits.'}
+            {error
+              ? 'Backend action needs attention.'
+              : 'Product service is ready for edits.'}
           </p>
         </Card>
       </section>
@@ -253,7 +276,13 @@ function ProductManagementPage() {
               onKeyDown={handleSearchKeyDown}
               placeholder="Search by product name or description..."
               icon={
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
                   <circle cx="11" cy="11" r="6" />
                   <path d="m20 20-4.2-4.2" />
                 </svg>
@@ -268,11 +297,7 @@ function ProductManagementPage() {
               Search
             </Button>
             {(query || page > 1) && (
-              <Button
-                variant="ghost"
-                size="md"
-                onClick={handleClear}
-              >
+              <Button variant="ghost" size="md" onClick={handleClear}>
                 Clear
               </Button>
             )}
@@ -302,7 +327,9 @@ function ProductManagementPage() {
               <TableRow key={product.id}>
                 <TableCell>
                   <div>
-                    <div className="text-base font-semibold text-white">{product.name}</div>
+                    <div className="text-base font-semibold text-white">
+                      {product.name}
+                    </div>
                     {product.description && (
                       <div className="mt-0.5 max-w-[280px] truncate text-sm text-[#b1bad7]">
                         {product.description}
@@ -311,14 +338,31 @@ function ProductManagementPage() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <span className="text-sm text-[#b1bad7]">{getCategoryName(product.categoryId)}</span>
+                  <span className="text-sm text-[#b1bad7]">
+                    {getCategoryName(product.categoryId)}
+                  </span>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-3">
-                    <Button onClick={() => openEditModal(product)} variant="secondary" size="sm">
+                    <Button
+                      onClick={() => navigate(`/products/${product.id}/variants`)}
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Variants
+                    </Button>
+                    <Button
+                      onClick={() => openEditModal(product)}
+                      variant="secondary"
+                      size="sm"
+                    >
                       Edit
                     </Button>
-                    <Button onClick={() => handleDelete(product.id)} variant="danger" size="sm">
+                    <Button
+                      onClick={() => handleDelete(product.id)}
+                      variant="danger"
+                      size="sm"
+                    >
                       Delete
                     </Button>
                   </div>
@@ -349,7 +393,13 @@ function ProductManagementPage() {
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 icon={
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M15 18l-6-6 6-6" />
                   </svg>
                 }
@@ -358,7 +408,10 @@ function ProductManagementPage() {
               </Button>
               <div className="flex items-center gap-1">
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
+                  .filter(
+                    (p) =>
+                      p === 1 || p === totalPages || Math.abs(p - page) <= 2
+                  )
                   .map((p, idx, arr) => (
                     <span key={p} className="contents">
                       {idx > 0 && arr[idx - 1] !== p - 1 && (
@@ -383,7 +436,13 @@ function ProductManagementPage() {
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 icon={
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <path d="M9 18l6-6-6-6" />
                   </svg>
                 }
@@ -410,13 +469,18 @@ function ProductManagementPage() {
           />
 
           <div>
-            <label htmlFor="product-description" className="mb-2 block font-mono text-xs uppercase tracking-[0.2em] text-[#cfd8ff]">
+            <label
+              htmlFor="product-description"
+              className="mb-2 block font-mono text-xs uppercase tracking-[0.2em] text-[#cfd8ff]"
+            >
               Description
             </label>
             <textarea
               id="product-description"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               rows={3}
               className="block w-full rounded-[16px] border border-[var(--line)] bg-[#0d1427] px-4 py-3 text-slate-100 outline-none transition placeholder:text-[var(--muted)] focus:border-[#d3dbff] focus:shadow-[0_0_0_3px_rgba(188,202,255,0.14)]"
             />
@@ -424,19 +488,31 @@ function ProductManagementPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="product-category" className="mb-2 block font-mono text-xs uppercase tracking-[0.2em] text-[#cfd8ff]">
+              <label
+                htmlFor="product-category"
+                className="mb-2 block font-mono text-xs uppercase tracking-[0.2em] text-[#cfd8ff]"
+              >
                 Category
               </label>
               <select
                 id="product-category"
                 value={formData.categoryId}
-                onChange={(e) => setFormData({ ...formData, categoryId: Number(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    categoryId: Number(e.target.value),
+                  })
+                }
                 className="block w-full rounded-[16px] border border-[var(--line)] bg-[#0d1427] px-4 py-3 text-slate-100 outline-none transition focus:border-[#d3dbff] focus:shadow-[0_0_0_3px_rgba(188,202,255,0.14)]"
                 required
               >
-                <option value={0} disabled>Select a category</option>
+                <option value={0} disabled>
+                  Select a category
+                </option>
                 {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -452,6 +528,7 @@ function ProductManagementPage() {
           </div>
         </form>
       </Dialog>
+
     </div>
   )
 }

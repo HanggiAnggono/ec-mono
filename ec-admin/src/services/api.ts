@@ -15,6 +15,14 @@ export interface Product {
     description: string
   }
   categoryId?: number
+  variants?: Variant[]
+}
+
+export interface Variant {
+  id: number
+  name: string
+  price: number
+  stock_quantity: number
 }
 
 export interface PaginatedResponse<T> {
@@ -137,6 +145,27 @@ class ApiClient {
 
   async deleteProduct(id: number): Promise<void> {
     return this.request(`/products/${id}`, {
+      method: 'DELETE',
+    })
+  }
+
+  // Variant APIs
+  async addVariants(productId: number, variants: { name: string; price: number }[]): Promise<Product> {
+    return this.request<Product>(`/products/${productId}/variants`, {
+      method: 'POST',
+      body: JSON.stringify(variants),
+    })
+  }
+
+  async updateVariant(variantId: number, data: { name: string; price: number }): Promise<void> {
+    return this.request(`/products/variants/${variantId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    })
+  }
+
+  async deleteVariant(variantId: number): Promise<void> {
+    return this.request(`/products/variants/${variantId}`, {
       method: 'DELETE',
     })
   }

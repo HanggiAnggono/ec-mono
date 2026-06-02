@@ -64,4 +64,9 @@ export class ProductsController {
   ) {
     return this.productsService.updateVariant(+variantId, variant);
   }
+
+  @Delete('/variants/:variantId')
+  deleteVariant(@Param('variantId') variantId: string) {
+    return this.productsService.deleteVariant(+variantId);
+  }
 }
