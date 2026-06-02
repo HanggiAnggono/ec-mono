@@ -32,3 +32,19 @@ export interface PaginatedResponse<T> {
   limit: number
   page: number
 }
+
+export interface User {
+  id: number
+  username: string
+  email: string
+  firstname?: string
+  lastname?: string
+  phone?: string
+}
+
+export interface LoginResponse {
+  token: string
+  refreshToken: string
+  user: User
+}
+

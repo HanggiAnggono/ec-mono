@@ -18,7 +18,13 @@
   }
 }
 
-/* Ensure dark theme defaults */
+/* Ensure dark theme defaults and layout vars */
 :root {
   color-scheme: dark;
+  --text: #e2e8f0;
+  --accent: #cad3ff;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.15);
+  --muted: #94a3b8;
 }
+

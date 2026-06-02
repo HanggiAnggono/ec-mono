@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+
 
 type NavItem = {
   label: string
@@ -74,26 +76,8 @@ const navItems: NavItem[] = [
   },
 ]
 
-const utilityItems = [
-  {
-    label: 'Notifications',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M15 18H5.5a1.5 1.5 0 0 1-1.1-2.5c1.1-1.1 1.6-2.6 1.6-4.1V10a6 6 0 1 1 12 0v1.4c0 1.5.6 3 1.6 4.1a1.5 1.5 0 0 1-1.1 2.5H15Z" />
-        <path d="M10 20a2 2 0 0 0 4 0" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Profile',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <circle cx="12" cy="8" r="3.5" />
-        <path d="M5 19a7 7 0 0 1 14 0" />
-      </svg>
-    ),
-  },
-]
+
+
 
 function SvgIcon({ children, size = 20 }: { children: ReactNode; size?: number }) {
   return (
@@ -149,6 +133,8 @@ function UtilityButton({ label, icon }: { label: string; icon: ReactNode }) {
 }
 
 function AdminLayout() {
+  const { user, logout } = useAuth()
+
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(158,176,255,0.16),_transparent_20%),linear-gradient(180deg,_#0b1020_0%,_#090e1b_100%)] text-[var(--text)]">
       <div className="relative min-h-screen overflow-hidden">
@@ -197,9 +183,37 @@ function AdminLayout() {
                 </div>
 
                 <div className="flex items-center justify-end gap-3">
-                  {utilityItems.map((u) => (
-                    <UtilityButton key={u.label} label={u.label} icon={u.icon} />
-                  ))}
+                  <UtilityButton
+                    label="Notifications"
+                    icon={
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path d="M15 18H5.5a1.5 1.5 0 0 1-1.1-2.5c1.1-1.1 1.6-2.6 1.6-4.1V10a6 6 0 1 1 12 0v1.4c0 1.5.6 3 1.6 4.1a1.5 1.5 0 0 1-1.1 2.5H15Z" />
+                        <path d="M10 20a2 2 0 0 0 4 0" />
+                      </svg>
+                    }
+                  />
+
+                  {/* Profile and Logout info */}
+                  <div className="flex items-center gap-3 pl-2 border-l border-[var(--line)]">
+                    <div className="text-right hidden sm:block">
+                      <p className="text-sm font-medium text-white">{user?.firstname || user?.username || 'Admin'}</p>
+                      <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--muted)]">Administrator</p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={logout}
+                      title="Log Out"
+                      className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--line)] bg-[rgba(255,255,255,0.03)] text-[#ffb8be] transition hover:border-[#ff949b] hover:bg-[rgba(255,100,100,0.08)] cursor-pointer"
+                      aria-label="Log Out"
+                    >
+                      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </header>
@@ -213,5 +227,6 @@ function AdminLayout() {
     </div>
   )
 }
+
 
 export default AdminLayout

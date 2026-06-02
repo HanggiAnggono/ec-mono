@@ -9,15 +9,27 @@ export class ApiClient {
     endpoint: string,
     options?: RequestInit
   ): Promise<T> {
+    const token = localStorage.getItem('ec_admin_token')
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...options?.headers as Record<string, string>,
+    }
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
       ...options,
+      headers,
     })
 
     if (!response.ok) {
+      if (response.status === 401) {
+        localStorage.removeItem('ec_admin_token')
+        localStorage.removeItem('ec_admin_user')
+        window.dispatchEvent(new Event('auth_session_expired'))
+      }
       const error = await response.json().catch(() => ({
         message: response.statusText,
         error: 'Unknown error',
@@ -28,5 +40,6 @@ export class ApiClient {
     return response.json()
   }
 }
+
 
 export default ApiClient

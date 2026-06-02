@@ -7,18 +7,22 @@ import { ApiClient as BaseApiClient } from './base-client'
 import { ProductCategoryApi } from './product-category.api'
 import { ProductsApi } from './products.api'
 import { VariantsApi } from './variants.api'
+import { AuthApi } from './auth.api'
 
 class CombinedApiClient extends BaseApiClient {
   productCategoryApi: ProductCategoryApi
   productsApi: ProductsApi
   variantsApi: VariantsApi
+  authApi: AuthApi
 
   constructor(baseUrl?: string) {
     super(baseUrl)
     this.productCategoryApi = new ProductCategoryApi()
     this.productsApi = new ProductsApi()
     this.variantsApi = new VariantsApi()
+    this.authApi = new AuthApi()
   }
+
 
   // Product Category APIs (for backward compatibility)
   async getCategories() {
