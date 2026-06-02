@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '../components/ui/Table'
-import { apiClient } from '../services/api'
+import { productCategoryApi } from '../services'
 
 interface Category {
   id: number
@@ -37,7 +37,7 @@ function ProductCategoryPage() {
     setIsLoading(true)
     setError(null)
     try {
-      const data = await apiClient.getCategories()
+      const data = await productCategoryApi.getCategories()
       setCategories(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load categories')
@@ -81,12 +81,12 @@ function ProductCategoryPage() {
 
     try {
       if (editingCategory) {
-        await apiClient.updateCategory(editingCategory.id, {
+        await productCategoryApi.updateCategory(editingCategory.id, {
           name: formData.name,
           description: formData.description,
         })
       } else {
-        await apiClient.createCategory({
+        await productCategoryApi.createCategory({
           name: formData.name,
           description: formData.description,
         })
@@ -102,7 +102,7 @@ function ProductCategoryPage() {
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this category?')) {
       try {
-        await apiClient.deleteCategory(id)
+        await productCategoryApi.deleteCategory(id)
         await loadCategories()
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to delete category')

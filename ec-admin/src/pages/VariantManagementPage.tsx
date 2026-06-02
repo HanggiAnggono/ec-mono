@@ -13,8 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from '../components/ui/Table'
-import { apiClient } from '../services/api'
-import type { Variant, Product } from '../services/api'
+import { productsApi, variantsApi } from '../services'
+import type { Variant, Product } from '../services'
 
 function VariantManagementPage() {
   const { productId } = useParams<{ productId: string }>()
@@ -37,7 +37,7 @@ function VariantManagementPage() {
     setIsLoading(true)
     setError(null)
     try {
-      const full = await apiClient.getProduct(id)
+      const full = await productsApi.getProduct(id)
       setProduct(full)
       setVariants(full.variants ?? [])
     } catch (err) {
@@ -76,9 +76,9 @@ function VariantManagementPage() {
 
     try {
       if (editingVariant) {
-        await apiClient.updateVariant(editingVariant.id, variantForm)
+        await variantsApi.updateVariant(editingVariant.id, variantForm)
       } else {
-        await apiClient.addVariants(id, [variantForm])
+        await variantsApi.addVariants(id, [variantForm])
       }
 
       await loadVariants()
@@ -97,7 +97,7 @@ function VariantManagementPage() {
       )
     ) {
       try {
-        await apiClient.deleteVariant(variantId)
+        await variantsApi.deleteVariant(variantId)
         await loadVariants()
       } catch (err) {
         setError(

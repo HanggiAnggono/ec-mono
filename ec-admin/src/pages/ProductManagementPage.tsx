@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '../components/ui/Table'
-import { apiClient } from '../services/api'
+import { productsApi, productCategoryApi } from '../services'
 
 interface Product {
   id: number
@@ -63,13 +63,13 @@ function ProductManagementPage() {
       const params: {
         page?: number
         take?: number
-        search?: string
+        name?: string
       } = { page: p, take: 10 }
 
       const sq = searchQuery ?? query
-      if (sq.trim()) params.search = sq.trim()
+      if (sq.trim()) params.name = sq.trim()
 
-      const data = await apiClient.getProducts(params)
+      const data = await productsApi.getProducts(params)
       setProducts(data.data)
       setTotalPages(data.totalPage)
       setTotalRecords(data.totalRecords)
@@ -82,7 +82,7 @@ function ProductManagementPage() {
 
   const loadCategories = async () => {
     try {
-      const data = await apiClient.getCategories()
+      const data = await productCategoryApi.getCategories()
       setCategories(data)
     } catch {
       // silently fail
@@ -139,13 +139,13 @@ function ProductManagementPage() {
 
     try {
       if (editingProduct) {
-        await apiClient.updateProduct(editingProduct.id, {
+        await productsApi.updateProduct(editingProduct.id, {
           name: formData.name,
           description: formData.description,
           categoryId: formData.categoryId,
         })
       } else {
-        await apiClient.createProduct({
+        await productsApi.createProduct({
           name: formData.name,
           description: formData.description,
           categoryId: formData.categoryId,
@@ -164,7 +164,7 @@ function ProductManagementPage() {
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
       try {
-        await apiClient.deleteProduct(id)
+        await productsApi.deleteProduct(id)
         await loadProducts()
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to delete product')

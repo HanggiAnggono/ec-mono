@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
-import { apiClient } from '../services/api'
+import { productCategoryApi, productsApi } from '../services'
 
 type MetricCardProps = {
   label: string
@@ -30,8 +30,8 @@ function Dashboard() {
     const loadStats = async () => {
       try {
         const [categories, products] = await Promise.all([
-          apiClient.getCategories(),
-          apiClient.getProducts({ page: 1, take: 1 }),
+          productCategoryApi.getCategories(),
+          productsApi.getProducts({ page: 1, take: 1 }),
         ])
 
         setCategoryCount(categories.length)
