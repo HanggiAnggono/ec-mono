@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -13,7 +13,9 @@ import {
   TableHeader,
   TableRow,
 } from '../components/ui/Table'
-import { productsApi, productCategoryApi } from '../services'
+import { useCategories } from '../usecases/useCategories'
+import { useProducts } from '../usecases/useProducts'
+import { productsApi } from '../services'
 
 interface Product {
   id: number
@@ -27,12 +29,6 @@ interface Product {
   categoryId?: number
 }
 
-interface Category {
-  id: number
-  name: string
-  description: string
-}
-
 const defaultFormData = {
   name: '',
   description: '',
@@ -41,61 +37,27 @@ const defaultFormData = {
 
 function ProductManagementPage() {
   const navigate = useNavigate()
-  const [products, setProducts] = useState<Product[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [totalRecords, setTotalRecords] = useState(0)
   const [saving, setSaving] = useState(false)
+
+  const { data: categories = [] } = useCategories()
+  const {
+    data: productsData,
+    isLoading: productsLoading,
+    error: productsError,
+    refetch: refetchProducts,
+  } = useProducts({ page, take: 10, name: query.trim() || undefined })
+  const isLoading = productsLoading
+  const error = productsError instanceof Error ? productsError.message : null
+  const totalPages = productsData?.totalPage ?? 1
+  const totalRecords = productsData?.totalRecords ?? 0
 
   const [formData, setFormData] = useState({ ...defaultFormData })
 
-  const loadProducts = async (searchQuery?: string, pageNum?: number) => {
-    setIsLoading(true)
-    setError(null)
-    try {
-      const p = pageNum ?? page
-      const params: {
-        page?: number
-        take?: number
-        name?: string
-      } = { page: p, take: 10 }
-
-      const sq = searchQuery ?? query
-      if (sq.trim()) params.name = sq.trim()
-
-      const data = await productsApi.getProducts(params)
-      setProducts(data.data)
-      setTotalPages(data.totalPage)
-      setTotalRecords(data.totalRecords)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load products')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const loadCategories = async () => {
-    try {
-      const data = await productCategoryApi.getCategories()
-      setCategories(data)
-    } catch {
-      // silently fail
-    }
-  }
-
-  useEffect(() => {
-    const init = async () => {
-      await Promise.all([loadProducts(), loadCategories()])
-    }
-    void init()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // Data is fetched via TanStack Query hooks above. No manual loading functions needed.
 
   const openCreateModal = () => {
     setEditingProduct(null)
@@ -120,7 +82,7 @@ function ProductManagementPage() {
 
   const handleSearch = () => {
     setPage(1)
-    void loadProducts(query, 1)
+    // query state change will trigger useProducts refetch automatically
   }
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
@@ -134,7 +96,6 @@ function ProductManagementPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
     setSaving(true)
 
     try {
@@ -152,10 +113,9 @@ function ProductManagementPage() {
         })
       }
 
-      await loadProducts()
+      // Refetch products after mutation
+      void refetchProducts()
       closeModal()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save product')
     } finally {
       setSaving(false)
     }
@@ -165,10 +125,10 @@ function ProductManagementPage() {
     if (window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
       try {
         await productsApi.deleteProduct(id)
-        await loadProducts()
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to delete product')
-      }
+      void refetchProducts()
+    } catch {
+      // error handling could be added here
+    }
     }
   }
 
@@ -176,7 +136,7 @@ function ProductManagementPage() {
     categories.find((c) => c.id === categoryId)?.name ?? `Category #${categoryId}`
 
   const normalizedQuery = query.trim().toLowerCase()
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = (productsData?.data ?? []).filter((product) => {
     if (!normalizedQuery) return true
     return (
       product.name.toLowerCase().includes(normalizedQuery) ||

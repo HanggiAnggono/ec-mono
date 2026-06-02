@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+/* React hooks removed as data is now fetched via TanStack Query usecases */
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { Badge } from '../components/ui/Badge'
-import { productCategoryApi, productsApi } from '../services'
+import { useCategories } from '../usecases/useCategories'
+import { useProducts } from '../usecases/useProducts'
 
 type MetricCardProps = {
   label: string
@@ -22,27 +23,12 @@ function MetricCard({ label, value, note }: MetricCardProps) {
 }
 
 function Dashboard() {
-  const [categoryCount, setCategoryCount] = useState<number | null>(null)
-  const [productCount, setProductCount] = useState<number | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories()
+  const { data: productsData, isLoading: productsLoading } = useProducts({ page: 1, take: 1 })
 
-  useEffect(() => {
-    const loadStats = async () => {
-      try {
-        const [categories, products] = await Promise.all([
-          productCategoryApi.getCategories(),
-          productsApi.getProducts({ page: 1, take: 1 }),
-        ])
-
-        setCategoryCount(categories.length)
-        setProductCount(products.totalRecords)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    void loadStats()
-  }, [])
+  const loading = categoriesLoading || productsLoading
+  const categoryCount = categories?.length ?? 0
+  const productCount = productsData?.totalRecords ?? 0
 
   return (
     <div className="space-y-8">
