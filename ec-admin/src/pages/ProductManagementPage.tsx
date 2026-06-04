@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { FormEvent, KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
@@ -16,6 +17,7 @@ import {
 import { useCategories } from '../usecases/useCategories'
 import { useProducts } from '../usecases/useProducts'
 import { productsApi } from '../services'
+import Pagination from '../components/ui/Pagination'
 
 interface Product {
   id: number
@@ -41,6 +43,7 @@ function ProductManagementPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
   const [saving, setSaving] = useState(false)
 
   const { data: categories = [] } = useCategories()
@@ -49,7 +52,7 @@ function ProductManagementPage() {
     isLoading: productsLoading,
     error: productsError,
     refetch: refetchProducts,
-  } = useProducts({ page, take: 10, name: query.trim() || undefined })
+  } = useProducts({ page, take: itemsPerPage, name: query.trim() || undefined })
   const isLoading = productsLoading
   const error = productsError instanceof Error ? productsError.message : null
   const totalPages = productsData?.totalPage ?? 1
@@ -85,7 +88,7 @@ function ProductManagementPage() {
     // query state change will trigger useProducts refetch automatically
   }
 
-  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+  const handleSearchKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') handleSearch()
   }
 
@@ -94,7 +97,7 @@ function ProductManagementPage() {
     setPage(1)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setSaving(true)
 
@@ -122,18 +125,23 @@ function ProductManagementPage() {
   }
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+    if (
+      window.confirm(
+        'Are you sure you want to delete this product? This action cannot be undone.'
+      )
+    ) {
       try {
         await productsApi.deleteProduct(id)
-      void refetchProducts()
-    } catch {
-      // error handling could be added here
-    }
+        void refetchProducts()
+      } catch {
+        // error handling could be added here
+      }
     }
   }
 
   const getCategoryName = (categoryId?: number) =>
-    categories.find((c) => c.id === categoryId)?.name ?? `Category #${categoryId}`
+    categories.find((c) => c.id === categoryId)?.name ??
+    `Category #${categoryId}`
 
   const normalizedQuery = query.trim().toLowerCase()
   const filteredProducts = (productsData?.data ?? []).filter((product) => {
@@ -305,7 +313,9 @@ function ProductManagementPage() {
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-3">
                     <Button
-                      onClick={() => navigate(`/products/${product.id}/variants`)}
+                      onClick={() =>
+                        navigate(`/products/${product.id}/variants`)
+                      }
                       variant="secondary"
                       size="sm"
                     >
@@ -341,77 +351,17 @@ function ProductManagementPage() {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between rounded-[26px] border border-t-0 border-[var(--line)] bg-[rgba(22,31,53,0.9)] px-6 py-4">
-            <p className="text-sm text-[var(--muted)]">
-              Page {page} of {totalPages} ({totalRecords} total)
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                disabled={page <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                icon={
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M15 18l-6-6 6-6" />
-                  </svg>
-                }
-              >
-                Previous
-              </Button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter(
-                    (p) =>
-                      p === 1 || p === totalPages || Math.abs(p - page) <= 2
-                  )
-                  .map((p, idx, arr) => (
-                    <span key={p} className="contents">
-                      {idx > 0 && arr[idx - 1] !== p - 1 && (
-                        <span className="px-1 text-[var(--muted)]">...</span>
-                      )}
-                      <button
-                        onClick={() => setPage(p)}
-                        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm transition ${
-                          p === page
-                            ? 'bg-[#cad3ff] text-[#17213c] font-semibold'
-                            : 'text-[#b1bad7] hover:bg-white/6 hover:text-white'
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    </span>
-                  ))}
-              </div>
-              <Button
-                variant="secondary"
-                size="sm"
-                disabled={page >= totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                icon={
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
-                }
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        )}
+        <Pagination
+          totalPages={totalPages}
+          page={page}
+          totalRecords={totalRecords}
+          onPageChange={setPage}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={(value) => {
+            setItemsPerPage(value)
+            setPage(1)
+          }}
+        />
       </section>
 
       {/* Create / Edit Dialog */}
@@ -488,7 +438,6 @@ function ProductManagementPage() {
           </div>
         </form>
       </Dialog>
-
     </div>
   )
 }
