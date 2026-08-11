@@ -42,6 +42,47 @@ export interface User {
   phone?: string
 }
 
+export type OrderStatus =
+  | 'pending'
+  | 'pending_payment'
+  | 'payment_received'
+  | 'order_confirmed'
+  | 'failed'
+  | 'expired'
+  | 'awaiting_shipment'
+  | 'on_hold'
+  | 'awaiting_pickup'
+  | 'completed'
+  | 'cancelled'
+
+export interface OrderItem {
+  id: number
+  quantity: number
+  price: number
+  productVariant?: {
+    id: number
+    name: string
+    product?: { id: number; name: string }
+  }
+}
+
+export interface OrderAddress {
+  id: string
+  label: string
+  address: string
+  description?: string
+}
+
+export interface Order {
+  id: string
+  user?: User
+  orderItems: OrderItem[]
+  orderAddress?: OrderAddress
+  orderDate: string
+  totalAmount: number
+  order_status: OrderStatus
+}
+
 export interface LoginResponse {
   token: string
   refreshToken: string

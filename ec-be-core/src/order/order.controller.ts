@@ -18,6 +18,7 @@ import { FindOneOrderDto } from './dto/find-one-order.dto';
 import { FindAllOrderDto } from './dto/find-all-order.dto';
 import { FindAllOrdersQueryDto } from './dto/find-all-orders-query.dto';
 import { PageParamDto } from 'src/pagination/dto/pagination-param.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 
 @Controller('order')
 export class OrderController extends BaseAuthController {
@@ -39,6 +40,14 @@ export class OrderController extends BaseAuthController {
     return this.orderService.findAll(query, req.user.userId);
   }
 
+  @Get('admin')
+  @ApiOkResponse({ type: () => FindAllOrderDto })
+  async findAllAdmin(
+    @Query() query: FindAllOrdersQueryDto,
+  ): Promise<FindAllOrderDto> {
+    return this.orderService.findAll(query);
+  }
+
   @Get(':id')
   @ApiOkResponse({ type: () => FindOneOrderDto })
   findOne(@Param('id') id: string) {
@@ -48,6 +57,14 @@ export class OrderController extends BaseAuthController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
     return this.orderService.update(id, updateOrderDto);
+  }
+
+  @Patch(':id/status')
+  updateStatus(
+    @Param('id') id: string,
+    @Body() updateOrderStatusDto: UpdateOrderStatusDto,
+  ) {
+    return this.orderService.updateStatus(id, updateOrderStatusDto.status);
   }
 
   @Delete(':id')

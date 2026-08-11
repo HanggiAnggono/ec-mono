@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard'
 import ProductCategoryPage from './pages/ProductCategoryPage'
 import ProductManagementPage from './pages/ProductManagementPage'
 import VariantManagementPage from './pages/VariantManagementPage'
+import OrderManagementPage from './pages/OrderManagementPage'
 import Login from './pages/Login'
 import ProtectedRoute from './components/ProtectedRoute'
 import { AuthProvider } from './context/AuthContext'
@@ -22,6 +23,7 @@ function App() {
               <Route path="categories" element={<ProductCategoryPage />} />
               <Route path="products" element={<ProductManagementPage />} />
               <Route path="products/:productId/variants" element={<VariantManagementPage />} />
+              <Route path="orders" element={<OrderManagementPage />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

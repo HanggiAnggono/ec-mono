@@ -71,6 +71,7 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Orders',
+    to: '/orders',
     icon: (
       <svg
         viewBox="0 0 24 24"

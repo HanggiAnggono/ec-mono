@@ -8,12 +8,15 @@ import { ProductCategoryApi } from './product-category.api'
 import { ProductsApi } from './products.api'
 import { VariantsApi } from './variants.api'
 import { AuthApi } from './auth.api'
+import { OrdersApi } from './orders.api'
+import type { OrderStatus } from './types'
 
 class CombinedApiClient extends BaseApiClient {
   productCategoryApi: ProductCategoryApi
   productsApi: ProductsApi
   variantsApi: VariantsApi
   authApi: AuthApi
+  ordersApi: OrdersApi
 
   constructor(baseUrl?: string) {
     super(baseUrl)
@@ -21,6 +24,7 @@ class CombinedApiClient extends BaseApiClient {
     this.productsApi = new ProductsApi()
     this.variantsApi = new VariantsApi()
     this.authApi = new AuthApi()
+    this.ordersApi = new OrdersApi()
   }
 
 
@@ -77,6 +81,15 @@ class CombinedApiClient extends BaseApiClient {
 
   async deleteVariant(variantId: number) {
     return this.variantsApi.deleteVariant(variantId)
+  }
+
+  // Order APIs (for backward compatibility)
+  async getOrders(params?: { page?: number; take?: number; status?: OrderStatus }) {
+    return this.ordersApi.getOrders(params)
+  }
+
+  async updateOrderStatus(id: string, status: OrderStatus) {
+    return this.ordersApi.updateOrderStatus(id, status)
   }
 }
 

@@ -29,6 +29,7 @@ export class OrderService {
   ): Promise<FindAllOrderDto> {
     const qb = this.orderRepository
       .createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'usr')
       .leftJoinAndSelect('order.orderItems', 'oi')
       .leftJoinAndSelect('oi.productVariant', 'pv')
       .leftJoinAndSelect('pv.product', 'prod')
